@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/navigation_camera"
+        android:icon="@drawable/ic_photo_camera_24dp"
+        android:title="@string/title_camera"/>
+    <item
+        android:id="@+id/navigation_opengl"
+        android:icon="@drawable/ic_gl"
+        android:title="@string/title_OpenGL"/>
+    <item
+        android:id="@+id/navigation_opencv"
+        android:icon="@drawable/ic_cv"
+        android:title="@string/title_OpenCV"/>
+</menu>
