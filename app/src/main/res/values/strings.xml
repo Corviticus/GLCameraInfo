@@ -5,6 +5,12 @@
     <string name="title_OpenGL">OpenGL</string>
     <string name="title_OpenCV">OpenCV</string>
 
+    <string name="opencv_fragment">OpenCV Information</string>
+    <string name="opengl_fragment">OpenGL Information</string>
+    <string name="camera_fragment">Camera Information</string>
 
+    <string name="font_small" translatable="false">sans-serif</string>
+    <string name="font_medium" translatable="false">sans-serif-medium</string>
+    <string name="font_large" translatable="false">sans-serif-large</string>
 
 </resources>

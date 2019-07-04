@@ -6,7 +6,40 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <style name="BottomNavigationTheme" parent="Theme.AppCompat.Light">
+        <item name="colorPrimary">@color/colorAccent</item>
+        <item name="android:textColorSecondary">@color/gray</item>
+    </style>
 
-    
+
+    <style name="SmallText" parent="@android:style/TextAppearance.Small">
+        <item name="android:typeface">sans</item>
+        <item name="android:fontFamily">@string/font_small</item>
+        <item name="android:textStyle">normal</item>
+    </style>
+
+    <style name="MediumText" parent="@android:style/TextAppearance.Medium">
+        <item name="android:typeface">sans</item>
+        <item name="android:fontFamily">@string/font_medium</item>
+        <item name="android:textStyle">normal</item>
+    </style>
+
+    <style name="LargeText" parent="@android:style/TextAppearance.Large">
+        <item name="android:typeface">sans</item>
+        <item name="android:fontFamily">@string/font_large</item>
+        <item name="android:textStyle">normal</item>
+    </style>
+
+    <!-- ************* Card Style ************** -->
+    <style name="ImageCardViewStyle" parent="CardView">
+        <item name="cardPreventCornerOverlap">false</item>
+        <item name="cardBackgroundColor">@color/white</item>
+        <item name="cardElevation">4dp</item>
+        <item name="cardCornerRadius">4dp</item>
+        <item name="android:clickable">true</item>
+        <item name="android:layout_margin">6dp</item>
+        <item name="android:layout_gravity">fill_horizontal|fill_vertical</item>
+    </style>
+
 
 </resources>
