@@ -10,7 +10,7 @@ import android.view.ViewGroup
 import timber.log.Timber
 import android.opengl.GLSurfaceView
 import kotlinx.android.synthetic.main.open_gl_fragment_layout.*
-import android.opengl.GLES20
+import android.opengl.GLES30
 import android.opengl.Matrix.multiplyMM
 import android.opengl.Matrix.setRotateM
 import android.opengl.Matrix.setLookAtM
@@ -20,10 +20,6 @@ import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 
 class OpenGLFragment : Fragment() {
-
-    companion object {
-        fun newInstance() = OpenGLFragment()
-    }
 
     private lateinit var viewModel: OpenGlViewModel
 
@@ -46,7 +42,7 @@ class OpenGLFragment : Fragment() {
         mGLRenderer = GLRenderer()
 
         mGLSurfaceView = gl_surface_view
-        mGLSurfaceView?.setEGLContextClientVersion(2)
+        mGLSurfaceView?.setEGLContextClientVersion(3) // do this BEFORE setRenderer()
         mGLSurfaceView?.setRenderer(mGLRenderer)
 
         mGLSurfaceView?.renderMode = GLSurfaceView.RENDERMODE_CONTINUOUSLY
@@ -79,11 +75,6 @@ class OpenGLFragment : Fragment() {
  */
 class GLRenderer: GLSurfaceView.Renderer {
 
-    companion object {
-        private const val VERTEX_SHADER = "vertex_shader.glsl"
-        private const val FRAGMENT_SHADER = "fragment_shader.glsl"
-    }
-
     private var mSquare: Square? = null
     private var mTriangle: Triangle? = null
 
@@ -92,23 +83,20 @@ class GLRenderer: GLSurfaceView.Renderer {
     private val mProjectionMatrix = FloatArray(16)
     private val mViewMatrix = FloatArray(16)
     private val mRotationMatrix = FloatArray(16)
-    private val mAngle: Float = 0.toFloat()
 
     override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
 
         // Set the background frame color
-        GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f)
+        GLES30.glClearColor(0.0f, 0.0f, 0.0f, 1.0f)
 
         mTriangle = Triangle()
         mSquare = Square()
     }
 
     override fun onSurfaceChanged(gl: GL10, w: Int, h: Int) {
-        Timber.i("onSurfaceChanged() called with width=$w and height = $h")
 
-        // Adjust the viewport based on geometry changes,
-        // such as screen rotation
-        GLES20.glViewport(0, 0, w, h)
+        // Adjust the viewport based on geometry changes such as screen rotation
+        GLES30.glViewport(0, 0, w, h)
 
         // this projection matrix is applied to object coordinates in the onDrawFrame() method
         val ratio = w.toFloat() / h
@@ -120,7 +108,7 @@ class GLRenderer: GLSurfaceView.Renderer {
         val scratch = FloatArray(16)
 
         // Draw background color
-        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT or GLES20.GL_DEPTH_BUFFER_BIT)
+        GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT or GLES30.GL_DEPTH_BUFFER_BIT)
 
         // Set the camera position (View matrix)
         setLookAtM(mViewMatrix, 0, 0f, 0f, -3f, 0f, 0f, 0f, 0f, 1.0f, 0.0f)
@@ -147,7 +135,6 @@ class GLRenderer: GLSurfaceView.Renderer {
     /**
      * Utility method for compiling a OpenGL shader.
      *
-     *
      * **Note:** When developing shaders, use the checkGlError()
      * method to debug shader coding errors.
      *
@@ -156,12 +143,15 @@ class GLRenderer: GLSurfaceView.Renderer {
      * @return - Returns an id for the shader.
      */
     fun loadShader(type: Int, shaderCode: String): Int {
-        // create a vertex shader type (GLES20.GL_VERTEX_SHADER)
-        // or a fragment shader type (GLES20.GL_FRAGMENT_SHADER)
-        val shader = GLES20.glCreateShader(type)
+
+        // create a vertex shader type (GLES30.GL_VERTEX_SHADER)
+        // or a fragment shader type (GLES30.GL_FRAGMENT_SHADER)
+        val shader = GLES30.glCreateShader(type)
+
         // add the source code to the shader and compile it
-        GLES20.glShaderSource(shader, shaderCode)
-        GLES20.glCompileShader(shader)
+        GLES30.glShaderSource(shader, shaderCode)
+        GLES30.glCompileShader(shader)
+
         return shader
     }
 
@@ -170,7 +160,7 @@ class GLRenderer: GLSurfaceView.Renderer {
      * just after making it:
      *
      * <pre>
-     * mColorHandle = GLES20.glGetUniformLocation(mProgram, "vColor");
+     * mColorHandle = GLES30.glGetUniformLocation(mProgram, "vColor");
      * MyGLRenderer.checkGlError("glGetUniformLocation");</pre>
      *
      * If the operation is not successful, the check throws an error.
@@ -178,9 +168,9 @@ class GLRenderer: GLSurfaceView.Renderer {
      * @param glOperation - Name of the OpenGL call to check.
      */
     fun checkGlError(glOperation: String) {
-        while (GLES20.glGetError() != GLES20.GL_NO_ERROR) {
-            Timber.e( "$glOperation: glError ${GLES20.glGetError()}")
-            throw RuntimeException("$glOperation: glError ${GLES20.glGetError()}")
+        while (GLES30.glGetError() != GLES30.GL_NO_ERROR) {
+            Timber.e( "$glOperation: glError ${GLES30.glGetError()}")
+            throw RuntimeException("$glOperation: glError ${GLES30.glGetError()}")
         }
     }
 

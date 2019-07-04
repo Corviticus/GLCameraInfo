@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_height="match_parent"
         tools:context=".OpenGLFragment">
 
     <TextView
@@ -20,14 +20,15 @@
 
     <androidx.cardview.widget.CardView
             android:id="@+id/gl_card_view"
-            android:layout_width="75dp"
-            android:layout_height="75dp"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
             style="@style/ImageCardViewStyle"
             app:layout_constraintTop_toBottomOf="@id/open_gl_fragment_title"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintVertical_bias=".75">
+            app:layout_constraintVertical_bias=".80" app:cardPreventCornerOverlap="true"
+            app:cardUseCompatPadding="true">
 
         <android.opengl.GLSurfaceView
                 android:layout_width="match_parent"
@@ -35,7 +36,4 @@
                 android:id="@+id/gl_surface_view"/>
 
     </androidx.cardview.widget.CardView>
-
-
-
 </androidx.constraintlayout.widget.ConstraintLayout>
