@@ -12,7 +12,6 @@ import timber.log.Timber
 
 class MainActivity : AppCompatActivity(), CoroutineScope {
 
-
     /** Run all co-routines on Main  */
     private val job = SupervisorJob()
     override val coroutineContext: CoroutineContext
@@ -60,7 +59,8 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     }
 
     /**
-     * Creates a fragment
+     * Creates a fragment without adding it to the back stack
+     * This preserves the desired navigation behavior (back button does not affect bottom navigation)
      *
      * @param fragment Fragment to be launched
      * @param fragName String containing the fragment's name
@@ -70,7 +70,6 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         val fragmentTransaction = supportFragmentManager.beginTransaction()
         fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
         fragmentTransaction.replace(R.id.main_layout, fragment)
-        fragmentTransaction.addToBackStack(fragName)
         fragmentTransaction.commit()
 
         // set the toolbar title

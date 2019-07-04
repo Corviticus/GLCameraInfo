@@ -12,18 +12,6 @@ import android.opengl.GLES20
  */
 class Square {
 
-    companion object {
-
-        // number of coordinates per vertex in this array
-        internal val COORDS_PER_VERTEX = 3
-        internal var squareCoords = floatArrayOf(
-            -0.5f, 0.5f, 0.0f, // top left
-            -0.5f, -0.5f, 0.0f, // bottom left
-            0.5f, -0.5f, 0.0f, // bottom right
-            0.5f, 0.5f, 0.0f
-        ) // top right
-    }
-
     private val vertexShaderCode = // This matrix member variable provides a hook to manipulate
         // the coordinates of the objects that use this vertex shader
         "uniform mat4 uMVPMatrix;" +
@@ -54,8 +42,12 @@ class Square {
     // 4 bytes per vertex
     private val vertexStride = COORDS_PER_VERTEX * 4
 
+    // square color as RGBA
+    //private var color = floatArrayOf(0.2f, 0.709803922f, 0.898039216f, 1.0f)
 
-    internal var color = floatArrayOf(0.2f, 0.709803922f, 0.898039216f, 1.0f)
+    // this is the primary color from the app <color name="colorPrimary">#303F9F</color>
+    private var color = floatArrayOf(48.toFloat() / 255, 63.toFloat() / 255, 159.toFloat() / 255, 1.0f)
+
 
     /**
      * Set up the drawing object data for use in an OpenGL ES context
@@ -68,6 +60,7 @@ class Square {
             squareCoords.size * 4
         )
 
+        // use the device hardware's native byte order
         bb.order(ByteOrder.nativeOrder())
         vertexBuffer = bb.asFloatBuffer()
         vertexBuffer.put(squareCoords)
@@ -88,10 +81,17 @@ class Square {
         val vertexShader = mRenderer.loadShader(GLES20.GL_VERTEX_SHADER, vertexShaderCode)
         val fragmentShader = mRenderer.loadShader(GLES20.GL_FRAGMENT_SHADER, fragmentShaderCode)
 
-        mProgram = GLES20.glCreateProgram()             // create empty OpenGL Program
-        GLES20.glAttachShader(mProgram, vertexShader)   // add the vertex shader to program
-        GLES20.glAttachShader(mProgram, fragmentShader) // add the fragment shader to program
-        GLES20.glLinkProgram(mProgram)                  // create OpenGL program executables
+        // create empty OpenGL Program
+        mProgram = GLES20.glCreateProgram()
+
+        // add the vertex shader to program
+        GLES20.glAttachShader(mProgram, vertexShader)
+
+        // add the fragment shader to program
+        GLES20.glAttachShader(mProgram, fragmentShader)
+
+        // create OpenGL program executables
+        GLES20.glLinkProgram(mProgram)
     }
 
     /**
@@ -141,5 +141,19 @@ class Square {
         // Disable vertex array
         GLES20.glDisableVertexAttribArray(mPositionHandle)
     }
+
+    companion object {
+
+        // number of coordinates per vertex in this array
+        internal const val COORDS_PER_VERTEX = 3
+
+        internal var squareCoords = floatArrayOf(
+            -0.5f, 0.5f, 0.0f,  // top left
+            -0.5f, -0.5f, 0.0f, // bottom left
+            0.5f, -0.5f, 0.0f,  // bottom right
+            0.5f, 0.5f, 0.0f    // top right
+        )
+    }
+
 
 }
