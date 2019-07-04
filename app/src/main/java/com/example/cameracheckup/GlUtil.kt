@@ -1,12 +1,12 @@
 package com.example.cameracheckup
 
-import android.content.Context
+import android.content.res.Resources
+import android.content.res.Resources.getSystem
 import android.opengl.GLES30
 import android.opengl.Matrix
 import java.io.BufferedReader
 import java.io.IOException
 import timber.log.Timber
-
 
 /**
  * Some OpenGL utility functions adapted from Grafika
@@ -34,18 +34,17 @@ class GlUtil {
 
     /**
      * Creates a new program from the supplied vertex and fragment shaders
-     * @param context Application [Context]
      * @param vertexAssetFile Asset file containing the vertex shader code
      * @param fragmentAssetFile Asset file containing the fragment shader code
      * @return A handle to the program, or 0 on failure
      */
-    fun createProgram(context: Context, vertexAssetFile: String, fragmentAssetFile: String): Int {
+    fun createProgram(vertexAssetFile: String, fragmentAssetFile: String): Int {
 
-        val vertexSource = getStringFromFileInAssets(context, vertexAssetFile)
+        val vertexSource = getStringFromFileInAssets(vertexAssetFile)
         val vertexShader = compileShader(GLES30.GL_VERTEX_SHADER, vertexSource)
         if (vertexShader == 0) { return 0 }
 
-        val fragmentSource = getStringFromFileInAssets(context, fragmentAssetFile)
+        val fragmentSource = getStringFromFileInAssets(fragmentAssetFile)
         val fragmentShader = compileShader(GLES30.GL_FRAGMENT_SHADER, fragmentSource)
         if (fragmentShader == 0) { return 0 }
 
@@ -73,6 +72,7 @@ class GlUtil {
         return program
     }
 
+
     /**
      * Compiles the provided shader source
      * @return A handle to the shader, or 0 on failure
@@ -97,39 +97,16 @@ class GlUtil {
     }
 
     /**
-     * Utility method for compiling a OpenGL shader.
-     *
-     *
-     * **Note:** When developing shaders, use the checkGlError()
-     * method to debug shader coding errors.
-     *
-     * @param type - Vertex or fragment shader type.
-     * @param shaderCode - String containing the shader code.
-     * @return - Returns an id for the shader.
-     */
-    fun loadShader(type: Int, shaderCode: String): Int {
-
-        // create a vertex shader type (GLES30.GL_VERTEX_SHADER)
-        // or a fragment shader type (GLES30.GL_FRAGMENT_SHADER)
-        val shader = GLES30.glCreateShader(type)
-
-        // add the source code to the shader and compile it
-        GLES30.glShaderSource(shader, shaderCode)
-        GLES30.glCompileShader(shader)
-
-        return shader
-    }
-
-    /**
      * Convert an asset file into a [String]
-     * @param ctx The application [Context]
      * @param filename The asset file name as a [String]
      * @return A [String] built from the shader file found in the options_menu.assets folder
      */
-    fun getStringFromFileInAssets(ctx: Context, filename: String): String {
+    private fun getStringFromFileInAssets(filename: String): String {
 
         try {
-            val inputStream = ctx.assets.open(filename)
+
+            val glAssets = getSystem().assets
+            val inputStream = glAssets.open(filename)
             val line = inputStream.bufferedReader().use(BufferedReader::readText)
             inputStream.close()
 
@@ -143,7 +120,7 @@ class GlUtil {
      * Checks to see if a GLES error has been raised.
      * @param op A [String] representing the OpenGL operation
      */
-    fun checkGLError(op: String) {
+    private fun checkGLError(op: String) {
         val error = GLES30.glGetError()
         if (error != GLES30.GL_NO_ERROR) {
             val msg = op + ": glError 0x" + Integer.toHexString(error)

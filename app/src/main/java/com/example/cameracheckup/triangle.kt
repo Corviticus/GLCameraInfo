@@ -8,23 +8,7 @@ import android.opengl.GLES30
 /**
  * A two-dimensional triangle for use as a drawn object in OpenGL ES 2.0.
  */
-class Triangle {
-
-    private val vertexShaderCode = // This matrix member variable provides a hook to manipulate
-        // the coordinates of the objects that use this vertex shader
-        "uniform mat4 uMVPMatrix;" +
-                "attribute vec4 vPosition;" +
-                "void main() {" +
-                "  gl_Position = uMVPMatrix * vPosition;" +
-                "}"
-
-    private val fragmentShaderCode = "precision mediump float;" +
-            "uniform vec4 vColor;" +
-            "void main() {" +
-            "  gl_FragColor = vColor;" +
-            "}"
-
-    private var mRenderer = GLRenderer()
+class Triangle(private val mRenderer: GLRenderer) {
 
     private val vertexBuffer: FloatBuffer
     private val mProgram: Int
@@ -32,13 +16,12 @@ class Triangle {
     private var mColorHandle: Int = 0
     private var mMVPMatrixHandle: Int = 0
 
-    private val vertexCount = triangleCoords.size / COORDS_PER_VERTEX
+    private val vertexCount = triangleCoordinates.size / COORDS_PER_VERTEX
 
     // 4 bytes per vertex
     private val vertexStride = COORDS_PER_VERTEX * 4
 
     // triangle color as RGBA
-
     // this is the accent color from the app <color name="colorAccent">#D35400</color>
     private var color = floatArrayOf(211.toFloat()/255, 84.toFloat() / 255, 0f, 0.0f)
 
@@ -51,7 +34,7 @@ class Triangle {
         // initialize vertex byte buffer for shape coordinates
         val bb = ByteBuffer.allocateDirect(
             // (number of coordinate values * 4 bytes per float)
-            triangleCoords.size * 4
+            triangleCoordinates.size * 4
         )
 
         // use the device hardware's native byte order
@@ -61,26 +44,12 @@ class Triangle {
         vertexBuffer = bb.asFloatBuffer()
 
         // add the coordinates to the FloatBuffer
-        vertexBuffer.put(triangleCoords)
+        vertexBuffer.put(triangleCoordinates)
 
         // set the buffer to read the first coordinate
         vertexBuffer.position(0)
 
-        // prepare shaders and OpenGL program
-        val vertexShader = mRenderer.loadShader(GLES30.GL_VERTEX_SHADER, vertexShaderCode)
-        val fragmentShader = mRenderer.loadShader(GLES30.GL_FRAGMENT_SHADER, fragmentShaderCode)
-
-        // create empty OpenGL Program
-        mProgram = GLES30.glCreateProgram()
-
-        // add the vertex shader to program
-        GLES30.glAttachShader(mProgram, vertexShader)
-
-        // add the fragment shader to program
-        GLES30.glAttachShader(mProgram, fragmentShader)
-
-        // create OpenGL program executables
-        GLES30.glLinkProgram(mProgram)
+        mProgram = mRenderer.createProgram(VERTEX_SHADER, FRAGMENT_SHADER)
     }
 
     /**
@@ -129,11 +98,14 @@ class Triangle {
 
     companion object {
 
+        private const val VERTEX_SHADER = "shaders/vertex_shader.glsl"
+        private const val FRAGMENT_SHADER = "shaders/fragment_shader.glsl"
+
         // number of coordinates per vertex in this array
         internal const val COORDS_PER_VERTEX = 3
 
         // in counterclockwise order
-        internal var triangleCoords = floatArrayOf(
+        internal var triangleCoordinates = floatArrayOf(
             0.0f, 0.622008459f, 0.0f,   // top
             -0.5f, -0.311004243f, 0.0f, // bottom left
             0.5f, -0.311004243f, 0.0f   // bottom right

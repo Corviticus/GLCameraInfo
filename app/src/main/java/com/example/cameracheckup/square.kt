@@ -10,23 +10,7 @@ import android.opengl.GLES30
 /**
  * A two-dimensional square for use as a drawn object in OpenGL ES 2.0.
  */
-class Square {
-
-    private val vertexShaderCode = // This matrix member variable provides a hook to manipulate
-        // the coordinates of the objects that use this vertex shader
-        "uniform mat4 uMVPMatrix;" +
-                "attribute vec4 vPosition;" +
-                "void main() {" +
-                "  gl_Position = uMVPMatrix * vPosition;" +
-                "}"
-
-    private val fragmentShaderCode = "precision mediump float;" +
-            "uniform vec4 vColor;" +
-            "void main() {" +
-            "  gl_FragColor = vColor;" +
-            "}"
-
-    private var mRenderer = GLRenderer()
+class Square(private val mRenderer: GLRenderer) {
 
     private val vertexBuffer: FloatBuffer
     private val drawListBuffer: ShortBuffer
@@ -43,11 +27,8 @@ class Square {
     private val vertexStride = COORDS_PER_VERTEX * 4
 
     // square color as RGBA
-    //private var color = floatArrayOf(0.2f, 0.709803922f, 0.898039216f, 1.0f)
-
     // this is the primary color from the app <color name="colorPrimary">#303F9F</color>
     private var color = floatArrayOf(48.toFloat() / 255, 63.toFloat() / 255, 159.toFloat() / 255, 1.0f)
-
 
     /**
      * Set up the drawing object data for use in an OpenGL ES context
@@ -57,13 +38,13 @@ class Square {
         // initialize vertex byte buffer for shape coordinates
         val bb = ByteBuffer.allocateDirect(
             // (# of coordinate values * 4 bytes per float)
-            squareCoords.size * 4
+            squareCoordinates.size * 4
         )
 
         // use the device hardware's native byte order
         bb.order(ByteOrder.nativeOrder())
         vertexBuffer = bb.asFloatBuffer()
-        vertexBuffer.put(squareCoords)
+        vertexBuffer.put(squareCoordinates)
         vertexBuffer.position(0)
 
         // initialize byte buffer for the draw list
@@ -77,21 +58,7 @@ class Square {
         drawListBuffer.put(drawOrder)
         drawListBuffer.position(0)
 
-        // prepare shaders and OpenGL program
-        val vertexShader = mRenderer.loadShader(GLES30.GL_VERTEX_SHADER, vertexShaderCode)
-        val fragmentShader = mRenderer.loadShader(GLES30.GL_FRAGMENT_SHADER, fragmentShaderCode)
-
-        // create empty OpenGL Program
-        mProgram = GLES30.glCreateProgram()
-
-        // add the vertex shader to program
-        GLES30.glAttachShader(mProgram, vertexShader)
-
-        // add the fragment shader to program
-        GLES30.glAttachShader(mProgram, fragmentShader)
-
-        // create OpenGL program executables
-        GLES30.glLinkProgram(mProgram)
+        mProgram = mRenderer.createProgram(VERTEX_SHADER, FRAGMENT_SHADER)
     }
 
     /**
@@ -144,16 +111,18 @@ class Square {
 
     companion object {
 
+        private const val VERTEX_SHADER = "shaders/vertex_shader.glsl"
+        private const val FRAGMENT_SHADER = "shaders/fragment_shader.glsl"
+
         // number of coordinates per vertex in this array
         internal const val COORDS_PER_VERTEX = 3
 
-        internal var squareCoords = floatArrayOf(
+        internal var squareCoordinates = floatArrayOf(
             -0.5f, 0.5f, 0.0f,  // top left
             -0.5f, -0.5f, 0.0f, // bottom left
             0.5f, -0.5f, 0.0f,  // bottom right
             0.5f, 0.5f, 0.0f    // top right
         )
     }
-
 
 }
