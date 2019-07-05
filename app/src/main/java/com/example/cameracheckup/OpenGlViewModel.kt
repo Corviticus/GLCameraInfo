@@ -1,7 +1,14 @@
 package com.example.cameracheckup
 
-import androidx.lifecycle.ViewModel;
+import androidx.lifecycle.ViewModel
 
 class OpenGlViewModel : ViewModel() {
-    // TODO: Implement the ViewModel
+
+    var supportsGL3: Boolean = false
+
+    var glVersion: String = ""
+
+    var glExtensions: String = ""
+
+
 }

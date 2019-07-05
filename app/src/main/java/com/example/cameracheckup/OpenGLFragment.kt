@@ -136,27 +136,6 @@ class GLRenderer(private val ctx: Context) : GLSurfaceView.Renderer {
     }
 
     /**
-     * Utility method for compiling a OpenGL shader.
-     *
-     * **Note:** When developing shaders, use the checkGlError()
-     * method to debug shader coding errors.
-     *
-     * @param type - [GLES30.GL_FRAGMENT_SHADER] or [GLES30.GL_VERTEX_SHADER]
-     * @param shaderCode - String containing the shader code.
-     * @return - Returns an id for the shader.
-     */
-    fun loadShader(type: Int, shaderCode: String): Int {
-
-        val shader = GLES30.glCreateShader(type)
-
-        // add the source code to the shader and compile it
-        GLES30.glShaderSource(shader, shaderCode)
-        GLES30.glCompileShader(shader)
-
-        return shader
-    }
-
-    /**
      * Utility method for debugging OpenGL calls. Provide the name of the call
      * just after making it:
      *
@@ -217,14 +196,17 @@ class GLRenderer(private val ctx: Context) : GLSurfaceView.Renderer {
 
 
     /**
-     * Compiles the provided shader source
+     * Compiles the provided shader shaderSource
      * @return A handle to the shader, or 0 on failure
      */
-    private fun compileShader(shaderType: Int, source: String): Int {
+    private fun compileShader(shaderType: Int, shaderSource: String): Int {
 
+        // create shader and check for errors
         val shader = GLES30.glCreateShader(shaderType)
         checkGLError("glCreateShader type=$shaderType")
-        GLES30.glShaderSource(shader, source)
+
+        // compile the shader
+        GLES30.glShaderSource(shader, shaderSource)
         GLES30.glCompileShader(shader)
 
         val compiled = IntArray(1)
@@ -242,10 +224,9 @@ class GLRenderer(private val ctx: Context) : GLSurfaceView.Renderer {
     /**
      * Convert an asset file into a [String]
      * @param filename The asset file name as a [String]
-     * @return A [String] built from the shader file found in the options_menu.assets folder
+     * @return A [String] built from the shader file found in the assets folder
      */
     private fun getStringFromFileInAssets(filename: String): String {
-
         try {
             val glAssets = ctx.assets
             val inputStream = glAssets.open(filename)
@@ -259,7 +240,7 @@ class GLRenderer(private val ctx: Context) : GLSurfaceView.Renderer {
     }
 
     /**
-     * Checks to see if a GLES error has been raised.
+     * Check to see if a GLES error has been raised
      * @param op A [String] representing the OpenGL operation
      */
     private fun checkGLError(op: String) {
@@ -267,9 +248,7 @@ class GLRenderer(private val ctx: Context) : GLSurfaceView.Renderer {
         if (error != GLES30.GL_NO_ERROR) {
             val msg = op + ": glError 0x" + Integer.toHexString(error)
             Timber.e(msg)
-            throw RuntimeException(msg) // TODO do something more graceful...
+            throw RuntimeException(msg) // TODO - do something more graceful...
         }
     }
-
-
 }
