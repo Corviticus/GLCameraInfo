@@ -1,12 +1,19 @@
 package com.example.cameracheckup
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
+import android.view.View
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentTransaction
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
 import timber.log.Timber
 
@@ -16,6 +23,13 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     private val job = SupervisorJob()
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main + job
+
+    // fragment for displaying release info and credits
+    private var mAboutFragment: AboutFragment? = null
+    private val isAboutFragmentShown: Boolean
+        get() = mAboutFragment != null && (mAboutFragment?.isVisible?: false)
+
+    private var mMenu: Menu? = null
 
     private var mCurrentFragment: androidx.fragment.app.Fragment? = null
 
@@ -56,6 +70,50 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         mBottomNavigationView?.setOnNavigationItemSelectedListener(onNavigationItemSelectedListener)
         mBottomNavigationView?.selectedItemId = R.id.navigation_camera
 
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+
+        val inflater = menuInflater
+        inflater.inflate(R.menu.main_menu, menu)
+
+        // save reference to the menu
+        mMenu = menu
+
+        return super.onCreateOptionsMenu(menu)
+    }
+
+    override fun onPrepareOptionsMenu(menu: Menu): Boolean {
+
+        // default is enabled
+        menu.getItem(0).isVisible = true
+        menu.getItem(0).isEnabled = true
+
+        return true
+    }
+
+    override fun onOptionsItemSelected(menuItem: MenuItem): Boolean {
+
+        when (menuItem.itemId) {
+            android.R.id.home -> {
+                val homeIntent = Intent(this, MainActivity::class.java)
+                homeIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                startActivity(homeIntent)
+                overridePendingTransition(R.anim.fade_in, R.anim.fade_out)
+                return true
+            }
+            R.id.action_about -> {
+                if (mAboutFragment == null) {
+                    mAboutFragment = AboutFragment.newInstance(getString(R.string.fragment_menu_name_about))
+                }
+                if (!isAboutFragmentShown) {
+                    mAboutFragment?.show(supportFragmentManager, "About Fragment")
+                }
+                return true
+            }
+        }
+
+        return super.onOptionsItemSelected(menuItem)
     }
 
     /**
