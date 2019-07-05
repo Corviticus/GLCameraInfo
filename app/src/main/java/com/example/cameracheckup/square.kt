@@ -26,10 +26,11 @@ class Square(private val mRenderer: GLRenderer) {
     // 4 bytes per vertex
     private val vertexStride = COORDS_PER_VERTEX * 4
 
-    // square color as RGBA
-    // this is the primary color from the app <color name="colorPrimary">#303F9F</color>
-    private var color = floatArrayOf(48.toFloat() / 255, 63.toFloat() / 255, 159.toFloat() / 255, 1.0f)
-
+    // this is the primary squareColor from the app <squareColor name="colorPrimary">#303F9F</squareColor>
+    private val red = "30".toLong(16) / 255f
+    private val green = "3F".toLong(16) / 255f
+    private val blue = "9F".toLong(16) / 255f
+    private var squareColor = floatArrayOf(red, green, blue, 0.0f)
     /**
      * Set up the drawing object data for use in an OpenGL ES context
      */
@@ -88,8 +89,8 @@ class Square(private val mRenderer: GLRenderer) {
         // get handle to fragment shader's vColor member
         mColorHandle = GLES30.glGetUniformLocation(mProgram, "vColor")
 
-        // Set color for drawing the triangle
-        GLES30.glUniform4fv(mColorHandle, 1, color, 0)
+        // Set squareColor for drawing the triangle
+        GLES30.glUniform4fv(mColorHandle, 1, squareColor, 0)
 
         // get handle to shape's transformation matrix
         mMVPMatrixHandle = GLES30.glGetUniformLocation(mProgram, "uMVPMatrix")

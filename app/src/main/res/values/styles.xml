@@ -11,7 +11,6 @@
         <item name="android:textColorSecondary">@color/gray</item>
     </style>
 
-
     <style name="SmallText" parent="@android:style/TextAppearance.Small">
         <item name="android:typeface">sans</item>
         <item name="android:fontFamily">@string/font_small</item>
@@ -30,7 +29,7 @@
         <item name="android:textStyle">normal</item>
     </style>
 
-    <!-- ************* Card Style ************** -->
+    <!-- ************* Card View Style ************** -->
     <style name="ImageCardViewStyle" parent="CardView">
         <item name="cardPreventCornerOverlap">false</item>
         <item name="cardBackgroundColor">@color/white</item>
@@ -39,6 +38,5 @@
         <item name="android:clickable">true</item>
         <item name="android:layout_margin">6dp</item>
     </style>
-
 
 </resources>

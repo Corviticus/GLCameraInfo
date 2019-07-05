@@ -16,15 +16,17 @@ class Triangle(private val mRenderer: GLRenderer) {
     private var mColorHandle: Int = 0
     private var mMVPMatrixHandle: Int = 0
 
-    private val vertexCount = triangleCoordinates.size / COORDS_PER_VERTEX
+    // this will be 3 for a triangle
+    private val vertexCount = triangleCoordinates.size / COORDINATES_PER_VERTEX
 
     // 4 bytes per vertex
-    private val vertexStride = COORDS_PER_VERTEX * 4
+    private val vertexStride = COORDINATES_PER_VERTEX * 4
 
-    // triangle color as RGBA
-    // this is the accent color from the app <color name="colorAccent">#D35400</color>
-    private var color = floatArrayOf(211.toFloat()/255, 84.toFloat() / 255, 0f, 0.0f)
-
+    // this is the accent triangleColor from the app <triangleColor name="colorAccent">#D35400</triangleColor>
+    private val red = "D3".toLong(16) / 255f
+    private val green = "54".toLong(16) / 255f
+    private val blue = "00".toLong(16) / 255f
+    private var triangleColor = floatArrayOf(red, green, blue, 0.0f)
 
     /**
      * Sets up the drawing object data for use in an OpenGL ES context.
@@ -49,6 +51,7 @@ class Triangle(private val mRenderer: GLRenderer) {
         // set the buffer to read the first coordinate
         vertexBuffer.position(0)
 
+        // compile the vertex and fragment shader glsl files
         mProgram = mRenderer.createProgram(VERTEX_SHADER, FRAGMENT_SHADER)
     }
 
@@ -71,15 +74,16 @@ class Triangle(private val mRenderer: GLRenderer) {
 
         // Prepare the triangle coordinate data
         GLES30.glVertexAttribPointer(
-            mPositionHandle, COORDS_PER_VERTEX,
+            mPositionHandle, COORDINATES_PER_VERTEX,
             GLES30.GL_FLOAT, false,
             vertexStride, vertexBuffer
         )
+
         // get handle to fragment shader's vColor member
         mColorHandle = GLES30.glGetUniformLocation(mProgram, "vColor")
 
-        // Set color for drawing the triangle
-        GLES30.glUniform4fv(mColorHandle, 1, color, 0)
+        // Set triangleColor for drawing the triangle
+        GLES30.glUniform4fv(mColorHandle, 1, triangleColor, 0)
 
         // get handle to shape's transformation matrix
         mMVPMatrixHandle = GLES30.glGetUniformLocation(mProgram, "uMVPMatrix")
@@ -102,7 +106,7 @@ class Triangle(private val mRenderer: GLRenderer) {
         private const val FRAGMENT_SHADER = "shaders/fragment_shader.glsl"
 
         // number of coordinates per vertex in this array
-        internal const val COORDS_PER_VERTEX = 3
+        internal const val COORDINATES_PER_VERTEX = 3
 
         // in counterclockwise order
         internal var triangleCoordinates = floatArrayOf(

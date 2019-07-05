@@ -1,7 +1,6 @@
 package com.example.cameracheckup
 
 import android.content.Context
-import android.content.res.Resources
 import android.opengl.*
 import androidx.lifecycle.ViewModelProviders
 import android.os.Bundle
@@ -43,6 +42,7 @@ class OpenGLFragment : Fragment() {
 
         viewModel = ViewModelProviders.of(this).get(OpenGlViewModel::class.java)
 
+        // create GL renderer passing in the app context so it can access asset files (shader glsl files)
         mGLRenderer = context?.let { GLRenderer(it) }
 
         mGLSurfaceView = gl_surface_view
@@ -108,7 +108,7 @@ class GLRenderer(private val ctx: Context) : GLSurfaceView.Renderer {
 
     override fun onDrawFrame(gl: GL10) {
 
-        val scratch = FloatArray(16)
+        val temp = FloatArray(16)
 
         // Draw background color
         GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT or GLES30.GL_DEPTH_BUFFER_BIT)
@@ -123,16 +123,16 @@ class GLRenderer(private val ctx: Context) : GLSurfaceView.Renderer {
         mSquare?.draw(mMVPMatrix)
 
         // Create a constant rotation for the triangle
-        val time = SystemClock.uptimeMillis() % 4000L
+        val time = SystemClock.uptimeMillis()
         val angle = 0.090f * (time)
-        setRotateM(mRotationMatrix, 0, angle, 0f, 0f, 1.0f)
+        setRotateM(mRotationMatrix, 0, angle*.3.toFloat(), 0f, 0f, 1.0f)
 
         // Combine the rotation matrix with the projection and camera view
-        // NOTE: the mMVPMatrix factor *must be first* in order for the matrix multiplication product to be correct
-        multiplyMM(scratch, 0, mMVPMatrix, 0, mRotationMatrix, 0)
+        // NOTE: the mMVPMatrix factor MUST BE FIRST in order for the matrix multiplication product to be correct
+        multiplyMM(temp, 0, mMVPMatrix, 0, mRotationMatrix, 0)
 
         // Draw triangle
-        mTriangle?.draw(scratch)
+        mTriangle?.draw(temp)
     }
 
     /**
