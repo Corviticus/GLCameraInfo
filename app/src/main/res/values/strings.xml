@@ -14,5 +14,10 @@
     <string name="font_small" translatable="false">sans-serif</string>
     <string name="font_medium" translatable="false">sans-serif-medium</string>
     <string name="font_large" translatable="false">sans-serif-large</string>
+    <string name="opengl_version">OpenGL Version</string>
+    <string name="opengl_supported_extensions">OpenGL Supported Extensions</string>
+    <string name="opengl_information">OpenGL Information</string>
+    <string name="camera_api_support">Camera API Support</string>
+    <string name="supported_camera_options">Supported Camera Options</string>
 
 </resources>

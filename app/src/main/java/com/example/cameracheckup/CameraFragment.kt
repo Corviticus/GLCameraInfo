@@ -9,7 +9,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.content.ContextCompat.getSystemService
+import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.camera_fragment_layout.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -49,7 +49,22 @@ class CameraFragment : Fragment(), CoroutineScope {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
+
+        // get instance of our view model
         viewModel = ViewModelProviders.of(this).get(CameraViewModel::class.java)
+
+        // use custom layout for the toolbar
+        (activity as AppCompatActivity).setSupportActionBar(toolbar_camera)
+        val customActionBar = (activity as AppCompatActivity).supportActionBar
+        customActionBar?.also {
+            it.setDisplayShowHomeEnabled(false)
+            it.setDisplayHomeAsUpEnabled(false)
+            it.setDisplayShowCustomEnabled(true)
+            it.setDisplayShowTitleEnabled(false)
+            it.title = null
+        }
+
+        setHasOptionsMenu(true)
 
         var optionsString = ""
 
@@ -83,13 +98,9 @@ class CameraFragment : Fragment(), CoroutineScope {
             }
 
             val hardwareSupport = "Your camera offers ${getCameraHardwareSupport()} Level hardware support. " +
-                    "This support level was determined by the manufacturer of this device and cannot be changed. " +
-                    "Your Rear Facing camera supports the following:" +
-                    "\n" +
-                    "\n" +
-                    optionsString +
-                    "\n"
-            hardware_support_textview.text = hardwareSupport
+                    "This support level was determined by the manufacturer of this device and cannot be changed. "
+
+            camera_version_text_view.text = hardwareSupport
         }
     }
 

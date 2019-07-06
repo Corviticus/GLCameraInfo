@@ -1,19 +1,15 @@
 package com.example.cameracheckup
 
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentTransaction
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
 import timber.log.Timber
 
@@ -126,12 +122,13 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     private fun launchFragment(fragment: androidx.fragment.app.Fragment, fragName: String) {
 
         val fragmentTransaction = supportFragmentManager.beginTransaction()
-        fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+        //fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+        fragmentTransaction.setCustomAnimations(R.anim.fade_in, R.anim.fade_out)
         fragmentTransaction.replace(R.id.main_layout, fragment)
         fragmentTransaction.commit()
 
         // set the toolbar title
-        supportActionBar?.title = fragName
+        supportActionBar?.title = null
     }
 
 }

@@ -6,9 +6,9 @@ class OpenGlViewModel : ViewModel() {
 
     var supportsGL3: Boolean = false
 
-    var glVersion: String = ""
+    var glVersion: String? = null
 
-    var glExtensions: String = ""
+    var glExtensions: String? = null
 
 
 }

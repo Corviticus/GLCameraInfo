@@ -1,39 +1,134 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:context=".OpenGLFragment">
+        android:layout_height="match_parent" >
 
-    <TextView
-            android:id="@+id/open_gl_fragment_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/opengl_fragment"
-            android:textAppearance="@style/LargeText"
+    <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/app_bar_layout"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintVertical_bias="0.10"/>
+            app:layout_constraintVertical_bias="0.00">
 
-    <androidx.cardview.widget.CardView
-            android:id="@+id/gl_card_view"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            style="@style/ImageCardViewStyle"
-            app:layout_constraintTop_toBottomOf="@id/open_gl_fragment_title"
+        <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" >
+
+            <androidx.appcompat.widget.Toolbar
+                    android:id="@+id/toolbar_gl"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:background="?colorPrimary"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.00"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:textAppearance="@style/LargeText"
+                    android:textColor="@color/white"
+                    android:text="@string/opengl_information"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintVertical_bias=".50"
+                    app:layout_constraintHorizontal_bias="0.00" />
+
+            <androidx.cardview.widget.CardView
+                    android:id="@+id/gl_card_view"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    style="@style/ImageCardViewStyle"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintVertical_bias=".50"
+                    app:layout_constraintHorizontal_bias="0.750"
+                    app:cardPreventCornerOverlap="true"
+                    app:cardUseCompatPadding="true">
+
+                <android.opengl.GLSurfaceView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:id="@+id/gl_surface_view"/>
+
+            </androidx.cardview.widget.CardView>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <LinearLayout
+            android:id="@+id/opengl_version_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintVertical_bias=".80" app:cardPreventCornerOverlap="true"
-            app:cardUseCompatPadding="true">
+            app:layout_constraintVertical_bias="0.00"
+            android:layout_marginTop="?attr/actionBarSize"
+            android:orientation="vertical">
 
-        <android.opengl.GLSurfaceView
+        <TextView
+                android:id="@+id/gl_version__title_text_view"
+                android:text="@string/opengl_version"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:id="@+id/gl_surface_view"/>
+                android:layout_height="wrap_content"
+                android:background="@color/light_gray"
+                android:textColor="@color/black"
+                android:textAppearance="@style/MediumText"
+                android:textStyle="bold"
+                android:padding="6dp"
+                android:gravity="center_horizontal"/>
 
-    </androidx.cardview.widget.CardView>
+        <TextView
+                android:id="@+id/gl_version_text_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/black"
+                android:textAppearance="@style/SmallText"
+                android:layout_gravity="center_horizontal"
+                android:layout_margin="12dp"/>
+    </LinearLayout>
+
+    <LinearLayout
+            android:id="@+id/opengl_extensions_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@+id/opengl_version_layout"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintVertical_bias="0.00"
+            android:layout_marginTop="12dp" android:orientation="vertical">
+
+        <TextView
+                android:id="@+id/gl_extensions_title_text_view"
+                android:text="@string/opengl_supported_extensions"
+                android:background="@color/light_gray"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="6dp"
+                android:textColor="@color/black"
+                android:textAppearance="@style/MediumText"
+                android:textStyle="bold" android:gravity="center_horizontal"/>
+
+        <TextView
+                android:id="@+id/gl_extensions_text_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/black"
+                android:textAppearance="@style/SmallText"
+                android:layout_gravity="start"
+                android:layout_margin="12dp"/>
+    </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
