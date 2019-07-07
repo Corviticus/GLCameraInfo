@@ -1,6 +1,7 @@
 package com.example.cameracheckup
 
 import android.content.Context
+import android.content.res.Resources
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
 import androidx.lifecycle.ViewModelProviders
@@ -79,12 +80,16 @@ class CameraFragment : Fragment(), CoroutineScope {
                             "- Night Mode\n" +
                             mCameraCapabilities +
                             mFocusCapabilities
+
+                    version_info_text_view.text = context?.getString(R.string.legacy_support_string)
                 }
 
                 SUPPORT_LEVEL_LIMITED -> {
                     optionsString = "\n" +
                             mCameraCapabilities +
                             mFocusCapabilities
+
+                    version_info_text_view.text = context?.getString(R.string.limited_support_string)
                 }
 
                 SUPPORT_LEVEL_FULL -> {
@@ -94,10 +99,12 @@ class CameraFragment : Fragment(), CoroutineScope {
                             "- Noise Reduction\n" +
                             mCameraCapabilities +
                             mFocusCapabilities
+
+                    version_info_text_view.text = context?.getString(R.string.full_support_string)
                 }
             }
 
-            val hardwareSupport = "Your camera offers ${getCameraHardwareSupport()} Level hardware support. " +
+            val hardwareSupport = "\u0009Your camera offers ${getCameraHardwareSupport()} Level hardware support. " +
                     "This support level was determined by the manufacturer of this device and cannot be changed. "
 
             camera_version_text_view.text = hardwareSupport
@@ -184,5 +191,7 @@ class CameraFragment : Fragment(), CoroutineScope {
 
         return stringBuilder.toString()
     }
+
+
 
 }

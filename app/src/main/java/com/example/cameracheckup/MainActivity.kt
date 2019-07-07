@@ -44,11 +44,6 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                 launchFragment(mCurrentFragment as OpenGLFragment, "OpenGL Checkup")
                 return@OnNavigationItemSelectedListener true
             }
-            R.id.navigation_opencv -> {
-                mCurrentFragment = OpenCVFragment()
-                launchFragment(mCurrentFragment as OpenCVFragment, "OpenCV Checkup")
-                return@OnNavigationItemSelectedListener true
-            }
         }
         false
     }

@@ -3,7 +3,7 @@
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" >
+        android:layout_height="match_parent">
 
     <com.google.android.material.appbar.AppBarLayout
             android:id="@+id/app_bar_layout_camera"
@@ -41,7 +41,7 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintHorizontal_bias="0.00" />
+                    app:layout_constraintHorizontal_bias="0.00"/>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </com.google.android.material.appbar.AppBarLayout>
@@ -78,6 +78,17 @@
                 android:textAppearance="@style/SmallText"
                 android:layout_gravity="center_horizontal"
                 android:layout_margin="12dp"/>
+
+        <TextView
+                android:id="@+id/version_info_text_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/black"
+                android:textAppearance="@style/SmallText"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginStart="12dp"
+                android:layout_marginEnd="12dp"/>
+
     </LinearLayout>
 
     <LinearLayout
@@ -90,19 +101,205 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintVertical_bias="0.00"
             android:layout_marginTop="18dp"
-            android:orientation="vertical" >
+            android:orientation="vertical">
 
-    <TextView
-            android:id="@+id/camera_options_title_text_view"
-            android:text="@string/supported_camera_options"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/light_gray"
-            android:textColor="@color/black"
-            android:textAppearance="@style/MediumText"
-            android:textStyle="bold"
-            android:padding="6dp"
-            android:gravity="center_horizontal"/>
+        <TextView
+                android:id="@+id/camera_options_title_text_view"
+                android:text="@string/supported_camera_options"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/light_gray"
+                android:textColor="@color/black"
+                android:textAppearance="@style/MediumText"
+                android:textStyle="bold"
+                android:padding="6dp"
+                android:gravity="center_horizontal"/>
 
     </LinearLayout>
+
+    <TableLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@+id/camera_options_layout"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintVertical_bias="0.00"
+            android:stretchColumns="0,1,2">
+
+        <TableRow
+                android:id="@+id/header"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+            <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/feature"
+                    android:textColor="@color/black"
+                    android:textAppearance="@style/SmallText"
+                    android:textStyle="bold"
+                    android:gravity="center"/>
+
+            <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/supported"
+                    android:textColor="@color/black"
+                    android:textAppearance="@style/SmallText"
+                    android:textStyle="bold"
+                    android:gravity="center"/>
+            <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/range"
+                    android:textColor="@color/black"
+                    android:textAppearance="@style/SmallText"
+                    android:textStyle="bold"
+                    android:gravity="center"/>
+        </TableRow>
+
+        <View android:layout_width="match_parent"
+              android:layout_height="1px"
+              android:background="@color/black"/>
+
+        <TableRow
+                android:id="@+id/ev_comp_row"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+            <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/exposure_compensation"
+                    android:textColor="@color/black"
+                    android:textAppearance="@style/SmallText"
+                    android:layout_marginStart="16dp"/>
+
+            <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/yes"
+                    android:textColor="@color/green"
+                    android:textAppearance="@style/SmallText"
+                    android:gravity="center"/>
+
+            <TextView
+                    android:id="@+id/ev_comp_range_textview"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="\u003C -12 to +12 \u003E"
+                    android:textColor="@color/black"
+                    android:textAppearance="@style/SmallText"
+                    android:gravity="center"/>
+        </TableRow>
+
+        <View android:layout_width="match_parent"
+              android:layout_height="1px"
+              android:background="@color/black"/>
+        <TableRow
+                android:id="@+id/row2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+            <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/iso_setting"
+                    android:textColor="@color/black"
+                    android:textAppearance="@style/SmallText"
+                    android:layout_marginStart="16dp"/>
+
+            <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/yes"
+                    android:textColor="@color/red"
+                    android:textAppearance="@style/SmallText"
+                    android:gravity="center"/>
+
+            <TextView
+                    android:id="@+id/iso_range_textview"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="\u003C  0 to 3200 \u003E"
+                    android:textColor="@color/black"
+                    android:textAppearance="@style/SmallText"
+                    android:gravity="center"/>
+        </TableRow>
+
+        <View android:layout_width="match_parent"
+              android:layout_height="1px"
+              android:background="@color/black"/>
+
+        <TableRow
+                android:id="@+id/row3"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+            <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/exposure_setting"
+                    android:textColor="@color/black"
+                    android:textAppearance="@style/SmallText"
+                    android:layout_marginStart="16dp"/>
+
+            <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/yes"
+                    android:textColor="@color/red"
+                    android:textAppearance="@style/SmallText"
+                    android:gravity="center"/>
+
+            <TextView
+                    android:id="@+id/ev_range_textview"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="\u003C  .001s to .1s \u003E"
+                    android:textColor="@color/black"
+                    android:textAppearance="@style/SmallText"
+                    android:gravity="center"/>
+        </TableRow>
+
+        <View android:layout_width="match_parent"
+              android:layout_height="1px"
+              android:background="@color/black"/>
+
+        <TableRow
+                android:id="@+id/row4"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+            <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/allows_lock_focus"
+                    android:textColor="@color/black"
+                    android:textAppearance="@style/SmallText"
+                    android:layout_marginStart="16dp"/>
+
+            <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/no"
+                    android:textColor="@color/red"
+                    android:textAppearance="@style/SmallText"
+                    android:gravity="center"/>
+
+            <TextView
+                    android:id="@+id/focus_lock_textview"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="\u003C On or Off \u003E"
+                    android:textColor="@color/black"
+                    android:textAppearance="@style/SmallText"
+                    android:gravity="center"/>
+        </TableRow>
+
+        <View android:layout_width="match_parent"
+              android:layout_height="1px"
+              android:background="@color/black"/>
+    </TableLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -19,5 +19,32 @@
     <string name="opengl_information">OpenGL Information</string>
     <string name="camera_api_support">Camera API Support</string>
     <string name="supported_camera_options">Supported Camera Options</string>
+    <string name="exposure_compensation">EV Compensation</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="iso_setting">ISO Settings</string>
+    <string name="exposure_setting">Exposure Settings</string>
+    <string name="allows_lock_focus">Lock Focus</string>
+    <string name="range">Range</string>
+    <string name="is_supported">Is Supported</string>
+    <string name="feature">Feature</string>
+    <string name="supported">Supported</string>
+
+    <string name="legacy_support_string">This device implements the Camera2 interface which are approximately the
+        same capabilities as those exposed to apps through the older Camera1 interface. LEGACY devices do not support
+        Camera API2 features such as ISO and EV settings or per-frame controls.</string>
+
+    <string name="limited_support_string">This device supports some, but not all, Camera2 capabilities and must
+        use the Camera HAL 3.2 or later.</string>
+
+    <string name="full_support_string">This device supports all of the major capabilities of the Camera API2 and
+        must use the Camera HAL 3.2 or later and Android 5.0 (Lollipop) or later.</string>
+
+    <string name="level_3_support_string">This device supports YUV reprocessing and RAW image capture, along with
+        additional output stream configurations.</string>
+
+    <string name="external_support_string">This device is similar to LIMITED devices with some exceptions;
+        for example, some sensor or lens information may not be reported or have less stable frame rates. This level
+        is used for external cameras such as USB webcams.</string>
 
 </resources>
