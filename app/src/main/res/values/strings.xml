@@ -47,4 +47,10 @@
         for example, some sensor or lens information may not be reported or have less stable frame rates. This level
         is used for external cameras such as USB webcams.</string>
 
+    <string name="permissions_title_camera">Camera Permissions Request</string>
+    <string name="camera_rationale_string">\tWithout camera permissions, this app cannot query the camera hardware for
+        supported features.
+        \n\nThe camera will NEVER take an actual picture, no image data is created and the results of the device query
+        are not saved.</string>
+
 </resources>

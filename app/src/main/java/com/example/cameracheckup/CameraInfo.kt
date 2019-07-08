@@ -6,7 +6,6 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.hardware.camera2.*
 import android.os.Handler
-import android.os.HandlerThread
 import android.util.Range
 import android.util.Size
 import androidx.core.app.ActivityCompat
@@ -19,6 +18,7 @@ import timber.log.Timber
 import java.util.concurrent.Semaphore
 import java.util.concurrent.TimeUnit
 import kotlin.coroutines.CoroutineContext
+import androidx.fragment.app.FragmentActivity
 
 
 class CameraInfo(private val activity: Activity, private val cameraViewModel: CameraViewModel) : CoroutineScope {
@@ -30,10 +30,10 @@ class CameraInfo(private val activity: Activity, private val cameraViewModel: Ca
 
 
     /** An additional thread for running tasks that shouldn't block the UI */
-    private var mBackgroundThread: HandlerThread? = null
+    // private var mBackgroundThread: HandlerThread? = null
 
     /** A [Handler] for running tasks in the background */
-    private var mBackgroundHandler: Handler? = null
+    // private var mBackgroundHandler: Handler? = null
 
     /** A [CameraManager] for, well, managing the camera! */
     private var mCameraManager: CameraManager? = null
@@ -107,7 +107,7 @@ class CameraInfo(private val activity: Activity, private val cameraViewModel: Ca
             // get a list of supported EV Compensation values and update the CameraFragment view model
             mRangeCompensation = getSupportedCompensationValues()
             cameraViewModel.evCompValues?.value = mRangeCompensation
-           cameraViewModel.supportsEVComp.value = (mRangeCompensation != null)
+            cameraViewModel.supportsEVComp.value = (mRangeCompensation != null)
         }
 
         override fun onDisconnected(cameraDevice: CameraDevice) {
@@ -124,13 +124,12 @@ class CameraInfo(private val activity: Activity, private val cameraViewModel: Ca
         }
     }
 
-
     /**
      * Opens the camera
-     * @param width
-     * @param height
+     * This never gets called unless we already have permissions.
+     * We check again to satisfy Android requirements...
      */
-     fun openCamera(width: Int, height: Int) {
+    fun openCamera() {
         Timber.d("openCamera() called...")
 
         if (mCameraDevice != null) return
@@ -138,40 +137,30 @@ class CameraInfo(private val activity: Activity, private val cameraViewModel: Ca
         mCameraManager = activity.getSystemService(Context.CAMERA_SERVICE) as CameraManager
         mCameraId = getRearFacingCamera()
 
-        if (ContextCompat.checkSelfPermission(activity.applicationContext, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            if (ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.CAMERA)) {
-
-            }
-            else {
-                ActivityCompat.requestPermissions(activity, arrayOf(Manifest.permission.CAMERA), REQUEST_CAMERA_PERMISSIONS)
-            }
-        }
-
         try {
             // Wait for camera to open - 2.5 seconds is "sufficient"
             if (!mCameraOpenCloseLock.tryAcquire(2500, TimeUnit.MILLISECONDS)) {
                 throw RuntimeException("Time out waiting to lock camera opening.")
             }
-            // OPEN the camera
-            mCameraId?.also {
-                this.launch(this.coroutineContext) {
-                    mCameraManager?.openCamera(it, mStateCallback, mBackgroundHandler)
+            // check yet again for correct permissions and then OPEN the camera
+            if (ContextCompat.checkSelfPermission(activity, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+                mCameraId?.also {
+                    this.launch(this.coroutineContext) {
+                        mCameraManager?.openCamera(it, mStateCallback, null)
+                    }
                 }
-
             }
         } catch (e: CameraAccessException) {
             Timber.e(e.toString())
         } catch (e: InterruptedException) {
             throw RuntimeException("Interrupted while trying to lock camera opening.", e)
         }
-
-
     }
 
     /**
      * Closes the current [CameraDevice].
      */
-     fun closeCamera() {
+    fun closeCamera() {
         Timber.d("closeCamera() called...")
 
         try {
@@ -269,6 +258,58 @@ class CameraInfo(private val activity: Activity, private val cameraViewModel: Ca
     }
 
     /**
+     *
+     * @return
+     */
+    fun getCameraHardwareSupport(): String {
+
+        val cameraManager = activity.getSystemService(Context.CAMERA_SERVICE) as CameraManager
+        val characteristics = cameraManager.getCameraCharacteristics("0")
+
+        var supportedHardwareLevel = SUPPORT_LEVEL_LEGACY
+        when {
+            characteristics.get(CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL)
+                    == CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL_FULL ->
+                supportedHardwareLevel = SUPPORT_LEVEL_FULL
+            characteristics.get(CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL)
+                    == CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY ->
+                supportedHardwareLevel = SUPPORT_LEVEL_LEGACY
+            characteristics.get(CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL)
+                    == CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED ->
+                supportedHardwareLevel = SUPPORT_LEVEL_LIMITED
+        }
+        return supportedHardwareLevel
+    }
+
+    /**
+     *
+     * @return
+     */
+    fun getCameraCapabilities(): String {
+
+        val stringBuilder = StringBuilder()
+
+        val cameraManager = activity.getSystemService(Context.CAMERA_SERVICE) as CameraManager
+        val characteristics = cameraManager.getCameraCharacteristics("0")
+
+        characteristics.get(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES)?.also {
+            for (i in 0 until it.size) {
+                when {
+                    it[i] == CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_BACKWARD_COMPATIBLE ->
+                        stringBuilder.append("- BACKWARD_COMPATIBLE\n")
+                    it[i] == CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_MANUAL_POST_PROCESSING ->
+                        stringBuilder.append("- MANUAL_POST_PROCESSING\n")
+                    it[i] == CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_MANUAL_SENSOR ->
+                        stringBuilder.append("- MANUAL_SENSOR\n")
+                    it[i] == CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_RAW ->
+                        stringBuilder.append("- RAW\n")
+                }
+            }
+        }
+        return stringBuilder.toString()
+    }
+
+    /**
      * Finds the ID of the Rear facing camera
      * @return the ID of the Rear facing camera as a [String]
      */
@@ -289,7 +330,11 @@ class CameraInfo(private val activity: Activity, private val cameraViewModel: Ca
         return backCameraId
     }
 
+    // a good place to keep some constants
     companion object {
-        private const val REQUEST_CAMERA_PERMISSIONS = 0
+        const val REQUEST_CAMERA_PERMISSIONS = 0
+        const val SUPPORT_LEVEL_LEGACY = "LEGACY"
+        const val SUPPORT_LEVEL_LIMITED = "LIMITED"
+        const val SUPPORT_LEVEL_FULL = "FULL"
     }
 }

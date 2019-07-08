@@ -1,9 +1,8 @@
 package com.example.cameracheckup
 
-import android.content.Context
+import android.Manifest
+import android.content.pm.PackageManager
 import android.graphics.Point
-import android.hardware.camera2.CameraCharacteristics
-import android.hardware.camera2.CameraManager
 import androidx.lifecycle.ViewModelProviders
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -11,8 +10,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.FragmentActivity
+import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.Observer
+import com.example.cameracheckup.CameraInfo.Companion.SUPPORT_LEVEL_FULL
+import com.example.cameracheckup.CameraInfo.Companion.SUPPORT_LEVEL_LEGACY
+import com.example.cameracheckup.CameraInfo.Companion.SUPPORT_LEVEL_LIMITED
 import kotlinx.android.synthetic.*
 import kotlinx.android.synthetic.main.camera_fragment_layout.*
 import kotlinx.coroutines.*
@@ -20,31 +25,28 @@ import org.jetbrains.anko.textColor
 import org.jetbrains.anko.windowManager
 import kotlin.coroutines.CoroutineContext
 
-
 class CameraFragment : Fragment(), CoroutineScope {
-
-    companion object {
-        const val SUPPORT_LEVEL_LEGACY = "LEGACY"
-        const val SUPPORT_LEVEL_LIMITED = "LIMITED"
-        const val SUPPORT_LEVEL_FULL = "FULL"
-    }
 
     /** Run all co-routines on Main  */
     private val job = SupervisorJob()
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main + job
 
-    private var mCameraViewModel: CameraViewModel? = null
-
-    private var mCameraCapabilities: String = ""
-    private var mFocusCapabilities: String = ""
-
+    private var mCameraCapabilities: String? = null
+    private var mFocusCapabilities: String? = null
+    //
     private var mCameraInfo: CameraInfo? = null
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
+    // the model for this fragment
+    private var mCameraViewModel: CameraViewModel? = null
+
+    private var mCameraPermissionsFragment: CameraPermissionsFragment? = null
+    private val isRationaleCamFragmentShown: Boolean
+        get() = mCameraPermissionsFragment != null
+                && (mCameraPermissionsFragment?.isVisible
+            ?: false)
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.camera_fragment_layout, container, false)
     }
 
@@ -58,16 +60,40 @@ class CameraFragment : Fragment(), CoroutineScope {
         // get instance of our view model
         mCameraViewModel = ViewModelProviders.of(this).get(CameraViewModel::class.java)
 
-
-        setViewModelObservers()
-
+        // bind the UI to the CameraViewModel
+        bindViewModelObservers()
 
         // create instance of the CameraInfo class
         mCameraInfo = activity?.let { CameraInfo(it, mCameraViewModel as CameraViewModel) }
 
+        if (context?.let { ContextCompat.checkSelfPermission(it, Manifest.permission.CAMERA) } != PackageManager.PERMISSION_GRANTED) {
+            // do we need to explain the need for the camera permissions
+            activity?.also {
+                if (ActivityCompat.shouldShowRequestPermissionRationale(it, Manifest.permission.CAMERA)) {
+                    if (mCameraPermissionsFragment == null) {
+                        mCameraPermissionsFragment = CameraPermissionsFragment.newInstance("Camera Permissions Rationale")
+                    }
+                    if (!isRationaleCamFragmentShown) {
+                        val fragmentManager = (activity as FragmentActivity).supportFragmentManager
+                        mCameraPermissionsFragment?.show(fragmentManager, getString(R.string.permissions_title_camera))
 
-        // and ...  open the camera
-        mCameraInfo?.openCamera(displaySize.x, displaySize.y)
+                        // nag the user until they grant permissions
+                        fragmentManager.registerFragmentLifecycleCallbacks(object : FragmentManager.FragmentLifecycleCallbacks() {
+                            override fun onFragmentViewDestroyed(fragManager: FragmentManager, fragment: Fragment) {
+                                super.onFragmentViewDestroyed(fragManager, fragment)
+                                fragmentManager.unregisterFragmentLifecycleCallbacks(this)
+                                requestPermissions(arrayOf(Manifest.permission.CAMERA), CameraInfo.REQUEST_CAMERA_PERMISSIONS)
+                            }
+                        }, false)
+                    }
+                } else {
+                    requestPermissions(arrayOf(Manifest.permission.CAMERA), CameraInfo.REQUEST_CAMERA_PERMISSIONS)
+                }
+            }
+        } else {
+            // and finally, open the camera
+            mCameraInfo?.openCamera()
+        }
 
         // use custom layout for the toolbar
         (activity as AppCompatActivity).setSupportActionBar(toolbar_camera)
@@ -80,26 +106,21 @@ class CameraFragment : Fragment(), CoroutineScope {
             it.title = null
         }
 
+        // use the overflow menu
         setHasOptionsMenu(true)
 
         launch(coroutineContext) {
-
-            val hardwareSupport = "Your camera offers ${getCameraHardwareSupport()} Level hardware support. " +
+            // get camera hardware support level and display the opening paragraph
+            val supportedHardware = mCameraInfo?.getCameraHardwareSupport()
+            val hardwareSupportString = "Your camera offers $supportedHardware Level hardware support. " +
                     "This support level was determined by the manufacturer of this device and cannot be changed. "
-            camera_version_text_view.text = hardwareSupport
+            camera_version_text_view.text = hardwareSupportString
 
-            mCameraCapabilities = getCameraCapabilities()
-
-            when (getCameraHardwareSupport()) {
-                SUPPORT_LEVEL_LEGACY -> {
-                    version_info_text_view.text = context?.getString(R.string.legacy_support_string)
-                }
-                SUPPORT_LEVEL_LIMITED -> {
-                    version_info_text_view.text = context?.getString(R.string.limited_support_string)
-                }
-                SUPPORT_LEVEL_FULL -> {
-                    version_info_text_view.text = context?.getString(R.string.full_support_string)
-                }
+            // add more info about the support level
+            when (supportedHardware) {
+                SUPPORT_LEVEL_LEGACY -> version_info_text_view.text = context?.getString(R.string.legacy_support_string)
+                SUPPORT_LEVEL_LIMITED -> version_info_text_view.text = context?.getString(R.string.limited_support_string)
+                SUPPORT_LEVEL_FULL -> version_info_text_view.text = context?.getString(R.string.full_support_string)
             }
         }
     }
@@ -111,62 +132,32 @@ class CameraFragment : Fragment(), CoroutineScope {
         this@CameraFragment.clearFindViewByIdCache()
     }
 
-    /**
-     *
-     * @return
-     */
-    private fun getCameraHardwareSupport(): String {
+    // this will allow the app to continue after the user accepts the permissions request
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
 
-        val cameraManager = context?.getSystemService(Context.CAMERA_SERVICE) as CameraManager
-        val characteristics = cameraManager.getCameraCharacteristics("0")
-
-        var supportedHardwareLevel = SUPPORT_LEVEL_LIMITED
-        when {
-            characteristics.get(CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL)
-                    == CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL_FULL ->
-                supportedHardwareLevel = SUPPORT_LEVEL_FULL
-            characteristics.get(CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL)
-                    == CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY ->
-                supportedHardwareLevel = SUPPORT_LEVEL_LEGACY
-            characteristics.get(CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL)
-                    == CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED ->
-                supportedHardwareLevel = SUPPORT_LEVEL_LIMITED
-        }
-        return supportedHardwareLevel
-    }
-
-    /**
-     *
-     * @return
-     */
-    private fun getCameraCapabilities(): String {
-
-        val stringBuilder = StringBuilder()
-
-        val cameraManager = context?.getSystemService(Context.CAMERA_SERVICE) as CameraManager
-        val characteristics = cameraManager.getCameraCharacteristics("0")
-
-        characteristics.get(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES)?.also {
-            for (i in 0 until it.size) {
-                when {
-                    it[i] == CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_BACKWARD_COMPATIBLE ->
-                        stringBuilder.append("- BACKWARD_COMPATIBLE\n")
-                    it[i] == CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_MANUAL_POST_PROCESSING ->
-                        stringBuilder.append("- MANUAL_POST_PROCESSING\n")
-                    it[i] == CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_MANUAL_SENSOR ->
-                        stringBuilder.append("- MANUAL_SENSOR\n")
-                    it[i] == CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_RAW ->
-                        stringBuilder.append("- RAW\n")
+        when (requestCode) {
+            CameraInfo.REQUEST_CAMERA_PERMISSIONS -> {
+                // If request is cancelled, the result arrays are empty.
+                if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
+                    mCameraInfo?.openCamera()
+                } else {
+                    if (mCameraPermissionsFragment == null) {
+                        mCameraPermissionsFragment = CameraPermissionsFragment.newInstance("Camera Permissions Rationale")
+                    }
+                    if (!isRationaleCamFragmentShown) {
+                        val fragmentManager = (activity as FragmentActivity).supportFragmentManager
+                        mCameraPermissionsFragment?.show(fragmentManager, getString(R.string.permissions_title_camera))
+                    }
                 }
+                return
             }
         }
-        return stringBuilder.toString()
     }
 
     /**
      * An observer for each view model value. Used for updating the UI as the values change
      */
-    private fun setViewModelObservers() {
+    private fun bindViewModelObservers() {
         // exposure compensation value change observer
         mCameraViewModel?.evCompValues?.observe(this, Observer { compRange ->
             launch(coroutineContext) {
@@ -280,5 +271,5 @@ class CameraFragment : Fragment(), CoroutineScope {
             }
         })
     }
-
 }
+
