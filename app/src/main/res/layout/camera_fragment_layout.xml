@@ -179,16 +179,13 @@
             <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/yes"
-                    android:textColor="@color/green"
                     android:textAppearance="@style/SmallText"
-                    android:gravity="center"/>
+                    android:gravity="center" android:id="@+id/ev_comp_supported_textview"/>
 
             <TextView
                     android:id="@+id/ev_comp_range_textview"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="\u003C -12 to +12 \u003E"
                     android:textColor="@color/black"
                     android:textAppearance="@style/SmallText"
                     android:gravity="center"/>
@@ -213,16 +210,13 @@
             <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/yes"
-                    android:textColor="@color/red"
                     android:textAppearance="@style/SmallText"
-                    android:gravity="center"/>
+                    android:gravity="center" android:id="@+id/iso_supported_textview"/>
 
             <TextView
                     android:id="@+id/iso_range_textview"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="\u003C  0 to 3200 \u003E"
                     android:textColor="@color/black"
                     android:textAppearance="@style/SmallText"
                     android:gravity="center"/>
@@ -248,16 +242,13 @@
             <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/yes"
-                    android:textColor="@color/red"
                     android:textAppearance="@style/SmallText"
-                    android:gravity="center"/>
+                    android:gravity="center" android:id="@+id/exposure_supported_textview"/>
 
             <TextView
                     android:id="@+id/ev_range_textview"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="\u003C  .001s to .1s \u003E"
                     android:textColor="@color/black"
                     android:textAppearance="@style/SmallText"
                     android:gravity="center"/>
@@ -283,10 +274,8 @@
             <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/no"
-                    android:textColor="@color/red"
                     android:textAppearance="@style/SmallText"
-                    android:gravity="center"/>
+                    android:gravity="center" android:id="@+id/focus_lock_supported_textview"/>
 
             <TextView
                     android:id="@+id/focus_lock_textview"

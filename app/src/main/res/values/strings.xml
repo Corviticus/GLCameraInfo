@@ -31,8 +31,8 @@
     <string name="supported">Supported</string>
 
     <string name="legacy_support_string">This device implements the Camera2 interface which are approximately the
-        same capabilities as those exposed to apps through the older Camera1 interface. LEGACY devices do not support
-        Camera API2 features such as ISO and EV settings or per-frame controls.</string>
+        same capabilities as those exposed to apps through the older Camera1 interface.
+        \n\nLEGACY devices do not support Camera API2 features such as ISO and EV settings or per-frame controls.</string>
 
     <string name="limited_support_string">This device supports some, but not all, Camera2 capabilities and must
         use the Camera HAL 3.2 or later.</string>

@@ -1,6 +1,7 @@
 package com.example.cameracheckup
 
 import android.Manifest
+import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
 import android.hardware.camera2.*
@@ -8,8 +9,8 @@ import android.os.Handler
 import android.os.HandlerThread
 import android.util.Range
 import android.util.Size
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -20,12 +21,13 @@ import java.util.concurrent.TimeUnit
 import kotlin.coroutines.CoroutineContext
 
 
-class CameraInfo(private val context: Context) : CoroutineScope {
+class CameraInfo(private val activity: Activity, private val cameraViewModel: CameraViewModel) : CoroutineScope {
 
     /** Run all co-routines on Main  */
     private val job = SupervisorJob()
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main + job
+
 
     /** An additional thread for running tasks that shouldn't block the UI */
     private var mBackgroundThread: HandlerThread? = null
@@ -74,17 +76,11 @@ class CameraInfo(private val context: Context) : CoroutineScope {
     private var mMaxCompensation: Int? = null
     private var mMinCompensation: Int? = null
 
-    private var mSensorISOValue: Int? = null
-    private var mSensorExposureTime: Long? = null
-    private var mSensorEVCompValue: Int? = null
-
     /** A list of supported preview sizes with aspect ratios that match the native display ratio */
     private var mPreviewSizes = arrayListOf<Size>()
-
-    private var mSupportedCaptureSizes: MutableList<Size> = mutableListOf()
     private var mSupportedPreviewSizes: MutableList<Size> = mutableListOf()
+    private var mSupportedCaptureSizes: MutableList<Size> = mutableListOf()
     private var mLargestCaptureSize: Size = Size(0, 0)
-
 
     /**
      * This [CameraDevice.StateCallback] is called when the [CameraDevice] changes it's state
@@ -97,26 +93,21 @@ class CameraInfo(private val context: Context) : CoroutineScope {
             mCameraDevice = cameraDevice
 
             mFocusCharacteristics = getFocusCharacteristics()
-            mFocusCharacteristics?.forEach {
-                Timber.i("Focus Characteristics Array: $it")
-            }
 
-            if (mFocusCharacteristics == null) {
-                Timber.i("Focus Characteristics Array is NULL")
-            }
-
-            // get a list of supported ISO settings and notify listeners
+            // get a list of supported ISO settings and update the CameraFragment view model
             mRangeISO = getSupportedISOValues()
-            camOptionsAvailableListener?.onISOValuesAvailable(mRangeISO)
+            cameraViewModel.isoValues?.value = mRangeISO
+            cameraViewModel.supportsISO.value = (mRangeISO != null)
 
-            // get a list of supported Exposure settings and notify listeners
+            // get a list of supported Exposure settings and update the CameraFragment view model
             mRangeExposure = getSupportedExposureValues()
-            camOptionsAvailableListener?.onExposureValuesAvailable(mRangeExposure)
+            cameraViewModel.exposureValues?.value = mRangeExposure
+            cameraViewModel.supportsEV.value = (mRangeExposure != null)
 
+            // get a list of supported EV Compensation values and update the CameraFragment view model
             mRangeCompensation = getSupportedCompensationValues()
-            camOptionsAvailableListener?.onCompensationValuesAvailable(mRangeCompensation)
-
-            createCameraPreviewSession()
+            cameraViewModel.evCompValues?.value = mRangeCompensation
+           cameraViewModel.supportsEVComp.value = (mRangeCompensation != null)
         }
 
         override fun onDisconnected(cameraDevice: CameraDevice) {
@@ -144,29 +135,37 @@ class CameraInfo(private val context: Context) : CoroutineScope {
 
         if (mCameraDevice != null) return
 
-        if (ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA)
-            != PackageManager.PERMISSION_GRANTED) {
-            // requestCameraPermission()
-            return
-        } else {
-            try {
-                // Wait for camera to open - 2.5 seconds is "sufficient"
-                if (!mCameraOpenCloseLock.tryAcquire(2500, TimeUnit.MILLISECONDS)) {
-                    throw RuntimeException("Time out waiting to lock camera opening.")
-                }
-                // OPEN the camera
-                mCameraId?.also {
-                    this.launch(this.coroutineContext) {
-                        mCameraManager?.openCamera(it, mStateCallback, mBackgroundHandler)
-                    }
+        mCameraManager = activity.getSystemService(Context.CAMERA_SERVICE) as CameraManager
+        mCameraId = getRearFacingCamera()
 
-                }
-            } catch (e: CameraAccessException) {
-                Timber.e(e.toString())
-            } catch (e: InterruptedException) {
-                throw RuntimeException("Interrupted while trying to lock camera opening.", e)
+        if (ContextCompat.checkSelfPermission(activity.applicationContext, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.CAMERA)) {
+
+            }
+            else {
+                ActivityCompat.requestPermissions(activity, arrayOf(Manifest.permission.CAMERA), REQUEST_CAMERA_PERMISSIONS)
             }
         }
+
+        try {
+            // Wait for camera to open - 2.5 seconds is "sufficient"
+            if (!mCameraOpenCloseLock.tryAcquire(2500, TimeUnit.MILLISECONDS)) {
+                throw RuntimeException("Time out waiting to lock camera opening.")
+            }
+            // OPEN the camera
+            mCameraId?.also {
+                this.launch(this.coroutineContext) {
+                    mCameraManager?.openCamera(it, mStateCallback, mBackgroundHandler)
+                }
+
+            }
+        } catch (e: CameraAccessException) {
+            Timber.e(e.toString())
+        } catch (e: InterruptedException) {
+            throw RuntimeException("Interrupted while trying to lock camera opening.", e)
+        }
+
+
     }
 
     /**
@@ -232,6 +231,44 @@ class CameraInfo(private val context: Context) : CoroutineScope {
     }
 
     /**
+     *
+     * @return
+     */
+    private fun getFocusCharacteristics(): IntArray? {
+
+        return mCameraCharacteristics?.get(CameraCharacteristics.CONTROL_AF_AVAILABLE_MODES)
+    }
+
+    /**
+     *
+     * @return
+     */
+    private fun getFocusCapabilities(): String {
+
+        val stringBuilder = StringBuilder()
+
+        val cameraManager = activity.getSystemService(Context.CAMERA_SERVICE) as CameraManager
+        val characteristics = cameraManager.getCameraCharacteristics("0")
+
+        val minFocalDistance = characteristics.get(CameraCharacteristics.LENS_INFO_MINIMUM_FOCUS_DISTANCE)
+        val hyperFocalDistance = characteristics.get(CameraCharacteristics.LENS_INFO_HYPERFOCAL_DISTANCE)
+
+        minFocalDistance?.also {
+            stringBuilder.append("Minimum Focus Distance: ")
+            stringBuilder.append(minFocalDistance)
+            stringBuilder.append("\n")
+        }
+
+        hyperFocalDistance?.also {
+            stringBuilder.append("Maximum Focus Distance: ")
+            stringBuilder.append(hyperFocalDistance)
+            stringBuilder.append("\n")
+        }
+
+        return stringBuilder.toString()
+    }
+
+    /**
      * Finds the ID of the Rear facing camera
      * @return the ID of the Rear facing camera as a [String]
      */
@@ -250,5 +287,9 @@ class CameraInfo(private val context: Context) : CoroutineScope {
         }
 
         return backCameraId
+    }
+
+    companion object {
+        private const val REQUEST_CAMERA_PERMISSIONS = 0
     }
 }

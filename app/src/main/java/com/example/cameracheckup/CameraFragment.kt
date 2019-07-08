@@ -1,7 +1,7 @@
 package com.example.cameracheckup
 
 import android.content.Context
-import android.content.res.Resources
+import android.graphics.Point
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
 import androidx.lifecycle.ViewModelProviders
@@ -11,20 +11,19 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.Observer
+import kotlinx.android.synthetic.*
 import kotlinx.android.synthetic.main.camera_fragment_layout.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
+import org.jetbrains.anko.textColor
+import org.jetbrains.anko.windowManager
 import kotlin.coroutines.CoroutineContext
 
 
 class CameraFragment : Fragment(), CoroutineScope {
 
     companion object {
-
-        fun newInstance() = CameraFragment()
-
         const val SUPPORT_LEVEL_LEGACY = "LEGACY"
         const val SUPPORT_LEVEL_LIMITED = "LIMITED"
         const val SUPPORT_LEVEL_FULL = "FULL"
@@ -35,11 +34,12 @@ class CameraFragment : Fragment(), CoroutineScope {
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main + job
 
-
-    private lateinit var viewModel: CameraViewModel
+    private var mCameraViewModel: CameraViewModel? = null
 
     private var mCameraCapabilities: String = ""
     private var mFocusCapabilities: String = ""
+
+    private var mCameraInfo: CameraInfo? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -51,8 +51,23 @@ class CameraFragment : Fragment(), CoroutineScope {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
+        // get the device display size
+        val displaySize = Point()
+        context?.windowManager?.defaultDisplay?.getRealSize(displaySize)
+
         // get instance of our view model
-        viewModel = ViewModelProviders.of(this).get(CameraViewModel::class.java)
+        mCameraViewModel = ViewModelProviders.of(this).get(CameraViewModel::class.java)
+
+
+        setViewModelObservers()
+
+
+        // create instance of the CameraInfo class
+        mCameraInfo = activity?.let { CameraInfo(it, mCameraViewModel as CameraViewModel) }
+
+
+        // and ...  open the camera
+        mCameraInfo?.openCamera(displaySize.x, displaySize.y)
 
         // use custom layout for the toolbar
         (activity as AppCompatActivity).setSupportActionBar(toolbar_camera)
@@ -67,48 +82,33 @@ class CameraFragment : Fragment(), CoroutineScope {
 
         setHasOptionsMenu(true)
 
-        var optionsString = ""
-
         launch(coroutineContext) {
+
+            val hardwareSupport = "Your camera offers ${getCameraHardwareSupport()} Level hardware support. " +
+                    "This support level was determined by the manufacturer of this device and cannot be changed. "
+            camera_version_text_view.text = hardwareSupport
+
             mCameraCapabilities = getCameraCapabilities()
-            mFocusCapabilities = getFocusCapabilities()
 
             when (getCameraHardwareSupport()) {
-
                 SUPPORT_LEVEL_LEGACY -> {
-                    optionsString = "- Exposure Compensation Adjustment\n" +
-                            "- Night Mode\n" +
-                            mCameraCapabilities +
-                            mFocusCapabilities
-
                     version_info_text_view.text = context?.getString(R.string.legacy_support_string)
                 }
-
                 SUPPORT_LEVEL_LIMITED -> {
-                    optionsString = "\n" +
-                            mCameraCapabilities +
-                            mFocusCapabilities
-
                     version_info_text_view.text = context?.getString(R.string.limited_support_string)
                 }
-
                 SUPPORT_LEVEL_FULL -> {
-                    optionsString = "- Exposure Compensation Adjustment\n" +
-                            "- Sensor Sensitivity (ISO)\n" +
-                            "- Shutter Speed (EV)\n" +
-                            "- Noise Reduction\n" +
-                            mCameraCapabilities +
-                            mFocusCapabilities
-
                     version_info_text_view.text = context?.getString(R.string.full_support_string)
                 }
             }
-
-            val hardwareSupport = "\u0009Your camera offers ${getCameraHardwareSupport()} Level hardware support. " +
-                    "This support level was determined by the manufacturer of this device and cannot be changed. "
-
-            camera_version_text_view.text = hardwareSupport
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        mCameraInfo?.closeCamera()
+        coroutineContext.cancelChildren()
+        this@CameraFragment.clearFindViewByIdCache()
     }
 
     /**
@@ -164,34 +164,121 @@ class CameraFragment : Fragment(), CoroutineScope {
     }
 
     /**
-     *
-     * @return
+     * An observer for each view model value. Used for updating the UI as the values change
      */
-    private fun getFocusCapabilities(): String {
+    private fun setViewModelObservers() {
+        // exposure compensation value change observer
+        mCameraViewModel?.evCompValues?.observe(this, Observer { compRange ->
+            launch(coroutineContext) {
+                compRange?.let {
+                    val rangeString = "${it.lower} to ${it.upper}"
+                    val valueString = "\u003C $rangeString \u003E"
+                    ev_comp_range_textview.text = valueString
+                }
+            }
+        })
 
-        val stringBuilder = StringBuilder()
+        // iso value change observer
+        mCameraViewModel?.isoValues?.observe(this, Observer { isoRange ->
+            launch(coroutineContext) {
+                isoRange?.let {
+                    val rangeString = "${it.lower} to ${it.upper}"
+                    val valueString = "\u003C $rangeString \u003E"
+                    iso_range_textview.text = valueString
+                }
+            }
+        })
 
-        val cameraManager = context?.getSystemService(Context.CAMERA_SERVICE) as CameraManager
-        val characteristics = cameraManager.getCameraCharacteristics("0")
+        // exposure value change observer
+        mCameraViewModel?.exposureValues?.observe(this, Observer { evRange ->
+            launch(coroutineContext) {
+                evRange?.let {
+                    val rangeString = "${it.lower} to ${it.upper}"
+                    val valueString = "\u003C $rangeString \u003E"
+                    ev_range_textview.text = valueString
+                }
+            }
+        })
 
-        val minFocalDistance = characteristics.get(CameraCharacteristics.LENS_INFO_MINIMUM_FOCUS_DISTANCE)
-        val hyperFocalDistance = characteristics.get(CameraCharacteristics.LENS_INFO_HYPERFOCAL_DISTANCE)
+        // focus lock capability observer
+        mCameraViewModel?.supportsEVComp?.observe(this, Observer {
+            launch(coroutineContext) {
+                when (it) {
+                    true -> {
+                        ev_comp_supported_textview.also { textView ->
+                            textView.text = getString(R.string.yes)
+                            context?.let { textView.textColor = ContextCompat.getColor(it, R.color.green) }
+                        }
+                    }
+                    false -> {
+                        ev_comp_supported_textview.also { textView ->
+                            textView.text = getString(R.string.no)
+                            context?.let { textView.textColor = ContextCompat.getColor(it, R.color.red) }
+                        }
+                    }
+                }
+            }
+        })
 
-        minFocalDistance?.also {
-            stringBuilder.append("Minimum Focus Distance: ")
-            stringBuilder.append(minFocalDistance)
-            stringBuilder.append("\n")
-        }
+        // focus lock capability observer
+        mCameraViewModel?.supportsISO?.observe(this, Observer {
+            launch(coroutineContext) {
+                when (it) {
+                    true -> {
+                        iso_supported_textview.also { textView ->
+                            textView.text = getString(R.string.yes)
+                            context?.let { textView.textColor = ContextCompat.getColor(it, R.color.green) }
+                        }
+                    }
+                    false -> {
+                        iso_supported_textview.also { textView ->
+                            textView.text = getString(R.string.no)
+                            context?.let { textView.textColor = ContextCompat.getColor(it, R.color.red) }
+                        }
+                    }
+                }
+            }
+        })
 
-        hyperFocalDistance?.also {
-            stringBuilder.append("Maximum Focus Distance: ")
-            stringBuilder.append(hyperFocalDistance)
-            stringBuilder.append("\n")
-        }
+        // focus lock capability observer
+        mCameraViewModel?.supportsEV?.observe(this, Observer {
+            launch(coroutineContext) {
+                when (it) {
+                    true -> {
+                        exposure_supported_textview.also { textView ->
+                            textView.text = getString(R.string.yes)
+                            context?.let { textView.textColor = ContextCompat.getColor(it, R.color.green) }
+                        }
+                    }
+                    false -> {
+                        exposure_supported_textview.also { textView ->
+                            textView.text = getString(R.string.no)
+                            context?.let { textView.textColor = ContextCompat.getColor(it, R.color.red) }
+                        }
+                    }
+                }
+            }
+        })
 
-        return stringBuilder.toString()
+        // focus lock capability observer
+        mCameraViewModel?.supportsFocusLock?.observe(this, Observer {
+            launch(coroutineContext) {
+                when (it) {
+                    true -> {
+                        focus_lock_supported_textview.also { textView ->
+                            textView.text = getString(R.string.yes)
+                            context?.let { textView.textColor = ContextCompat.getColor(it, R.color.green) }
+                        }
+                    }
+                    false -> {
+                        focus_lock_supported_textview.also { textView ->
+                            textView.text = getString(R.string.no)
+                            context?.let { textView.textColor = ContextCompat.getColor(it, R.color.red) }
+                        }
+                    }
+                }
+            }
+        })
     }
-
-
 
 }
