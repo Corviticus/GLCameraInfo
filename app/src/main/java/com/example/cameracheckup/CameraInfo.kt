@@ -5,10 +5,11 @@ import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
 import android.hardware.camera2.*
+import android.hardware.camera2.CameraMetadata.*
+import android.os.Build
 import android.os.Handler
 import android.util.Range
 import android.util.Size
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -18,8 +19,6 @@ import timber.log.Timber
 import java.util.concurrent.Semaphore
 import java.util.concurrent.TimeUnit
 import kotlin.coroutines.CoroutineContext
-import androidx.fragment.app.FragmentActivity
-
 
 class CameraInfo(private val activity: Activity, private val cameraViewModel: CameraViewModel) : CoroutineScope {
 
@@ -63,18 +62,12 @@ class CameraInfo(private val activity: Activity, private val cameraViewModel: Ca
 
     /** Range of supported ISO settings */
     private var mRangeISO: Range<Int>? = null
-    private var mMaxISO: Int? = null
-    private var mMinISO: Int? = null
 
     /** Range of supported Exposure Value settings */
     private var mRangeExposure: Range<Long>? = null
-    private var mMaxExposure: Long? = null
-    private var mMinExposure: Long? = null
 
     /** Range of supported Exposure Compensation values */
     private var mRangeCompensation: Range<Int>? = null
-    private var mMaxCompensation: Int? = null
-    private var mMinCompensation: Int? = null
 
     /** A list of supported preview sizes with aspect ratios that match the native display ratio */
     private var mPreviewSizes = arrayListOf<Size>()
@@ -97,17 +90,14 @@ class CameraInfo(private val activity: Activity, private val cameraViewModel: Ca
             // get a list of supported ISO settings and update the CameraFragment view model
             mRangeISO = getSupportedISOValues()
             cameraViewModel.isoValues?.value = mRangeISO
-            cameraViewModel.supportsISO.value = (mRangeISO != null)
 
             // get a list of supported Exposure settings and update the CameraFragment view model
             mRangeExposure = getSupportedExposureValues()
             cameraViewModel.exposureValues?.value = mRangeExposure
-            cameraViewModel.supportsEV.value = (mRangeExposure != null)
 
             // get a list of supported EV Compensation values and update the CameraFragment view model
             mRangeCompensation = getSupportedCompensationValues()
             cameraViewModel.evCompValues?.value = mRangeCompensation
-            cameraViewModel.supportsEVComp.value = (mRangeCompensation != null)
         }
 
         override fun onDisconnected(cameraDevice: CameraDevice) {
@@ -181,12 +171,7 @@ class CameraInfo(private val activity: Activity, private val cameraViewModel: Ca
      */
     private fun getSupportedISOValues(): Range<Int>? {
 
-        val isoValues = mCameraCharacteristics?.get(CameraCharacteristics.SENSOR_INFO_SENSITIVITY_RANGE)
-
-        mMaxISO = isoValues?.upper
-        mMinISO = isoValues?.lower
-
-        return isoValues
+        return mCameraCharacteristics?.get(CameraCharacteristics.SENSOR_INFO_SENSITIVITY_RANGE)
     }
 
     /**
@@ -196,12 +181,7 @@ class CameraInfo(private val activity: Activity, private val cameraViewModel: Ca
      */
     private fun getSupportedExposureValues(): Range<Long>? {
 
-        val exposureValues = mCameraCharacteristics?.get(CameraCharacteristics.SENSOR_INFO_EXPOSURE_TIME_RANGE)
-
-        mMaxExposure = exposureValues?.upper
-        mMinExposure = exposureValues?.lower
-
-        return exposureValues
+        return mCameraCharacteristics?.get(CameraCharacteristics.SENSOR_INFO_EXPOSURE_TIME_RANGE)
     }
 
     /**
@@ -211,12 +191,7 @@ class CameraInfo(private val activity: Activity, private val cameraViewModel: Ca
      */
     private fun getSupportedCompensationValues(): Range<Int>? {
 
-        val compensationValues = mCameraCharacteristics?.get(CameraCharacteristics.CONTROL_AE_COMPENSATION_RANGE)
-
-        mMaxCompensation = compensationValues?.upper
-        mMinCompensation = compensationValues?.lower
-
-        return compensationValues
+        return mCameraCharacteristics?.get(CameraCharacteristics.CONTROL_AE_COMPENSATION_RANGE)
     }
 
     /**
@@ -267,16 +242,10 @@ class CameraInfo(private val activity: Activity, private val cameraViewModel: Ca
         val characteristics = cameraManager.getCameraCharacteristics("0")
 
         var supportedHardwareLevel = SUPPORT_LEVEL_LEGACY
-        when {
-            characteristics.get(CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL)
-                    == CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL_FULL ->
-                supportedHardwareLevel = SUPPORT_LEVEL_FULL
-            characteristics.get(CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL)
-                    == CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY ->
-                supportedHardwareLevel = SUPPORT_LEVEL_LEGACY
-            characteristics.get(CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL)
-                    == CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED ->
-                supportedHardwareLevel = SUPPORT_LEVEL_LIMITED
+        when (characteristics.get(CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL)) {
+            CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY -> supportedHardwareLevel = SUPPORT_LEVEL_LEGACY
+            CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED -> supportedHardwareLevel = SUPPORT_LEVEL_LIMITED
+            CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL_FULL ->  supportedHardwareLevel = SUPPORT_LEVEL_FULL
         }
         return supportedHardwareLevel
     }
@@ -290,19 +259,44 @@ class CameraInfo(private val activity: Activity, private val cameraViewModel: Ca
         val stringBuilder = StringBuilder()
 
         val cameraManager = activity.getSystemService(Context.CAMERA_SERVICE) as CameraManager
-        val characteristics = cameraManager.getCameraCharacteristics("0")
 
+        // query the CameraManager about the Rear facing camera's characteristics
+        val characteristics = cameraManager.getCameraCharacteristics("0")
         characteristics.get(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES)?.also {
             for (i in 0 until it.size) {
                 when {
-                    it[i] == CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_BACKWARD_COMPATIBLE ->
-                        stringBuilder.append("- BACKWARD_COMPATIBLE\n")
-                    it[i] == CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_MANUAL_POST_PROCESSING ->
-                        stringBuilder.append("- MANUAL_POST_PROCESSING\n")
-                    it[i] == CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_MANUAL_SENSOR ->
-                        stringBuilder.append("- MANUAL_SENSOR\n")
-                    it[i] == CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_RAW ->
-                        stringBuilder.append("- RAW\n")
+                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP -> when (i) {
+                        REQUEST_AVAILABLE_CAPABILITIES_BACKWARD_COMPATIBLE -> stringBuilder.append("- BACKWARD COMPATIBLE\n")
+                        REQUEST_AVAILABLE_CAPABILITIES_MANUAL_POST_PROCESSING -> stringBuilder.append("- MANUAL POST PROCESSING\n")
+                        REQUEST_AVAILABLE_CAPABILITIES_MANUAL_SENSOR -> stringBuilder.append("- MANUAL SENSOR\n")
+                        REQUEST_AVAILABLE_CAPABILITIES_RAW -> stringBuilder.append("- RAW IMAGE FORMAT\n")
+                    }
+                }
+                when {
+                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1 -> when (i) {
+                        REQUEST_AVAILABLE_CAPABILITIES_BURST_CAPTURE -> stringBuilder.append("- BURST CAPTURE\n")
+                        REQUEST_AVAILABLE_CAPABILITIES_READ_SENSOR_SETTINGS -> stringBuilder.append("- READ SENSOR SETTINGS\n")
+                    }
+                }
+                when {
+                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.M -> when (i) {
+                        REQUEST_AVAILABLE_CAPABILITIES_PRIVATE_REPROCESSING -> stringBuilder.append("- PRIVATE REPROCESSING\n")
+                        REQUEST_AVAILABLE_CAPABILITIES_YUV_REPROCESSING -> stringBuilder.append("- YUV REPROCESSING\n")
+                        REQUEST_AVAILABLE_CAPABILITIES_DEPTH_OUTPUT -> stringBuilder.append("- DEPTH OUTPUT\n")
+                        REQUEST_AVAILABLE_CAPABILITIES_CONSTRAINED_HIGH_SPEED_VIDEO -> stringBuilder.append("- CONSTRAINED HIGH SPEED VIDEO\n")
+                    }
+                }
+                when {
+                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.P -> when (i) {
+                        REQUEST_AVAILABLE_CAPABILITIES_MOTION_TRACKING -> stringBuilder.append("- MOTION TRACKING\n")
+                        REQUEST_AVAILABLE_CAPABILITIES_LOGICAL_MULTI_CAMERA -> stringBuilder.append("- LOGICAL MULTI CAMERA\n")
+                        REQUEST_AVAILABLE_CAPABILITIES_MONOCHROME -> stringBuilder.append("- MONOCHROME\n")
+                    }
+                }
+                when {
+                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> when (i) {
+                        REQUEST_AVAILABLE_CAPABILITIES_SECURE_IMAGE_DATA -> stringBuilder.append("- SECURE IMAGE DATA\n")
+                    }
                 }
             }
         }

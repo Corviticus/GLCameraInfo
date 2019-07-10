@@ -3,9 +3,7 @@
     <string name="app_name">CameraCheckup</string>
     <string name="title_camera">Camera</string>
     <string name="title_OpenGL">OpenGL</string>
-    <string name="title_OpenCV">OpenCV</string>
 
-    <string name="opencv_fragment">OpenCV Information</string>
     <string name="opengl_fragment">OpenGL Information</string>
     <string name="camera_fragment">Camera Information</string>
 

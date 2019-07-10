@@ -26,7 +26,7 @@ class Square(private val mRenderer: GLRenderer) {
     // 4 bytes per vertex
     private val vertexStride = COORDS_PER_VERTEX * 4
 
-    // this is the primary squareColor from the app <squareColor name="colorPrimary">#303F9F</squareColor>
+    // this is the primary squareColor from the app <squareColor extensionName="colorPrimary">#303F9F</squareColor>
     private val red = "30".toLong(16) / 255f
     private val green = "3F".toLong(16) / 255f
     private val blue = "9F".toLong(16) / 255f

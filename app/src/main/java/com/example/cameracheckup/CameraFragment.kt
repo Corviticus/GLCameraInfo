@@ -32,9 +32,7 @@ class CameraFragment : Fragment(), CoroutineScope {
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main + job
 
-    private var mCameraCapabilities: String? = null
-    private var mFocusCapabilities: String? = null
-    //
+    // helper class to query the camera capabilities
     private var mCameraInfo: CameraInfo? = null
 
     // the model for this fragment
@@ -66,6 +64,7 @@ class CameraFragment : Fragment(), CoroutineScope {
         // create instance of the CameraInfo class
         mCameraInfo = activity?.let { CameraInfo(it, mCameraViewModel as CameraViewModel) }
 
+        // ask user for camera permissions and nag if necessary
         if (context?.let { ContextCompat.checkSelfPermission(it, Manifest.permission.CAMERA) } != PackageManager.PERMISSION_GRANTED) {
             // do we need to explain the need for the camera permissions
             activity?.also {
@@ -165,6 +164,7 @@ class CameraFragment : Fragment(), CoroutineScope {
                     val rangeString = "${it.lower} to ${it.upper}"
                     val valueString = "\u003C $rangeString \u003E"
                     ev_comp_range_textview.text = valueString
+                    mCameraViewModel?.supportsEVComp?.value = true
                 }
             }
         })
@@ -176,6 +176,7 @@ class CameraFragment : Fragment(), CoroutineScope {
                     val rangeString = "${it.lower} to ${it.upper}"
                     val valueString = "\u003C $rangeString \u003E"
                     iso_range_textview.text = valueString
+                    mCameraViewModel?.supportsISO?.value = true
                 }
             }
         })
@@ -187,6 +188,7 @@ class CameraFragment : Fragment(), CoroutineScope {
                     val rangeString = "${it.lower} to ${it.upper}"
                     val valueString = "\u003C $rangeString \u003E"
                     ev_range_textview.text = valueString
+                    mCameraViewModel?.supportsEV?.value = true
                 }
             }
         })

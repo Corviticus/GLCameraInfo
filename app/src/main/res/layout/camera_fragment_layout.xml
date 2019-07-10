@@ -281,7 +281,6 @@
                     android:id="@+id/focus_lock_textview"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="\u003C On or Off \u003E"
                     android:textColor="@color/black"
                     android:textAppearance="@style/SmallText"
                     android:gravity="center"/>

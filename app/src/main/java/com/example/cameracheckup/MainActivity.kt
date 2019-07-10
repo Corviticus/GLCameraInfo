@@ -6,7 +6,6 @@ import android.view.Menu
 import android.view.MenuItem
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.FragmentTransaction
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -112,7 +111,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
      * This preserves the desired navigation behavior (back button does not affect bottom navigation)
      *
      * @param fragment Fragment to be launched
-     * @param fragName String containing the fragment's name
+     * @param fragName String containing the fragment's extensionName
      */
     private fun launchFragment(fragment: androidx.fragment.app.Fragment, fragName: String) {
 

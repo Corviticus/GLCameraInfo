@@ -156,7 +156,7 @@ class GLRenderer(private val ctx: Context) : GLSurfaceView.Renderer {
 
     /**
      * Convert an asset file into a [String]
-     * @param filename The asset file name as a [String]
+     * @param filename The asset file extensionName as a [String]
      * @return A [String] built from the shader file found in the assets folder
      */
     private fun getStringFromFileInAssets(filename: String): String {

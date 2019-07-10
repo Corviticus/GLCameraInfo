@@ -22,7 +22,7 @@ class Triangle(private val mRenderer: GLRenderer) {
     // 4 bytes per vertex
     private val vertexStride = COORDINATES_PER_VERTEX * 4
 
-    // this is the accent triangleColor from the app <triangleColor name="colorAccent">#D35400</triangleColor>
+    // this is the accent triangleColor from the app <triangleColor extensionName="colorAccent">#D35400</triangleColor>
     private val red = "D3".toLong(16) / 255f
     private val green = "54".toLong(16) / 255f
     private val blue = "00".toLong(16) / 255f
