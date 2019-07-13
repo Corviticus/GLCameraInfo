@@ -1,64 +1,57 @@
-package com.example.cameracheckup
-
+package com.example.glcamerainfo
 
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.FloatBuffer
-import java.nio.ShortBuffer
 import android.opengl.GLES30
 
 /**
- * A two-dimensional square for use as a drawn object in OpenGL ES 2.0.
+ * A two-dimensional triangle for use as a drawn object in OpenGL ES 2.0.
  */
-class Square(private val mRenderer: GLRenderer) {
+class Triangle(private val mRenderer: GLRenderer) {
 
     private val vertexBuffer: FloatBuffer
-    private val drawListBuffer: ShortBuffer
-    private var mProgram: Int
-
+    private val mProgram: Int
     private var mPositionHandle: Int = 0
     private var mColorHandle: Int = 0
     private var mMVPMatrixHandle: Int = 0
 
-    // order to draw vertices
-    private val drawOrder = shortArrayOf(0, 1, 2, 0, 2, 3)
+    // this will be 3 for a triangle
+    private val vertexCount = triangleCoordinates.size / COORDINATES_PER_VERTEX
 
     // 4 bytes per vertex
-    private val vertexStride = COORDS_PER_VERTEX * 4
+    private val vertexStride = COORDINATES_PER_VERTEX * 4
 
-    // this is the primary squareColor from the app <squareColor extensionName="colorPrimary">#303F9F</squareColor>
-    private val red = "30".toLong(16) / 255f
-    private val green = "3F".toLong(16) / 255f
-    private val blue = "9F".toLong(16) / 255f
-    private var squareColor = floatArrayOf(red, green, blue, 0.0f)
+    // this is the accent triangleColor from the app <triangleColor extensionName="colorAccent">#D35400</triangleColor>
+    private val red = "D3".toLong(16) / 255f
+    private val green = "54".toLong(16) / 255f
+    private val blue = "00".toLong(16) / 255f
+    private var triangleColor = floatArrayOf(red, green, blue, 0.0f)
+
     /**
-     * Set up the drawing object data for use in an OpenGL ES context
+     * Sets up the drawing object data for use in an OpenGL ES context.
      */
     init {
 
         // initialize vertex byte buffer for shape coordinates
         val bb = ByteBuffer.allocateDirect(
-            // (# of coordinate values * 4 bytes per float)
-            squareCoordinates.size * 4
+            // (number of coordinate values * 4 bytes per float)
+            triangleCoordinates.size * 4
         )
 
         // use the device hardware's native byte order
         bb.order(ByteOrder.nativeOrder())
+
+        // create a floating point buffer from the ByteBuffer
         vertexBuffer = bb.asFloatBuffer()
-        vertexBuffer.put(squareCoordinates)
+
+        // add the coordinates to the FloatBuffer
+        vertexBuffer.put(triangleCoordinates)
+
+        // set the buffer to read the first coordinate
         vertexBuffer.position(0)
 
-        // initialize byte buffer for the draw list
-        val dlb = ByteBuffer.allocateDirect(
-            // (# of coordinate values * 2 bytes per short)
-            drawOrder.size * 2
-        )
-
-        dlb.order(ByteOrder.nativeOrder())
-        drawListBuffer = dlb.asShortBuffer()
-        drawListBuffer.put(drawOrder)
-        drawListBuffer.position(0)
-
+        // compile the vertex and fragment shader glsl files
         mProgram = mRenderer.createProgram(VERTEX_SHADER, FRAGMENT_SHADER)
     }
 
@@ -81,7 +74,7 @@ class Square(private val mRenderer: GLRenderer) {
 
         // Prepare the triangle coordinate data
         GLES30.glVertexAttribPointer(
-            mPositionHandle, COORDS_PER_VERTEX,
+            mPositionHandle, COORDINATES_PER_VERTEX,
             GLES30.GL_FLOAT, false,
             vertexStride, vertexBuffer
         )
@@ -89,8 +82,8 @@ class Square(private val mRenderer: GLRenderer) {
         // get handle to fragment shader's vColor member
         mColorHandle = GLES30.glGetUniformLocation(mProgram, "vColor")
 
-        // Set squareColor for drawing the triangle
-        GLES30.glUniform4fv(mColorHandle, 1, squareColor, 0)
+        // Set triangleColor for drawing the triangle
+        GLES30.glUniform4fv(mColorHandle, 1, triangleColor, 0)
 
         // get handle to shape's transformation matrix
         mMVPMatrixHandle = GLES30.glGetUniformLocation(mProgram, "uMVPMatrix")
@@ -100,11 +93,8 @@ class Square(private val mRenderer: GLRenderer) {
         GLES30.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mvpMatrix, 0)
         mRenderer.checkGlError("glUniformMatrix4fv")
 
-        // Draw the square
-        GLES30.glDrawElements(
-            GLES30.GL_TRIANGLES, drawOrder.size,
-            GLES30.GL_UNSIGNED_SHORT, drawListBuffer
-        )
+        // Draw the triangle
+        GLES30.glDrawArrays(GLES30.GL_TRIANGLES, 0, vertexCount)
 
         // Disable vertex array
         GLES30.glDisableVertexAttribArray(mPositionHandle)
@@ -116,14 +106,13 @@ class Square(private val mRenderer: GLRenderer) {
         private const val FRAGMENT_SHADER = "shaders/fragment_shader.glsl"
 
         // number of coordinates per vertex in this array
-        internal const val COORDS_PER_VERTEX = 3
+        internal const val COORDINATES_PER_VERTEX = 3
 
-        internal var squareCoordinates = floatArrayOf(
-            -0.5f, 0.5f, 0.0f,  // top left
-            -0.5f, -0.5f, 0.0f, // bottom left
-            0.5f, -0.5f, 0.0f,  // bottom right
-            0.5f, 0.5f, 0.0f    // top right
+        // in counterclockwise order
+        internal var triangleCoordinates = floatArrayOf(
+            0.0f, 0.622008459f, 0.0f,   // top
+            -0.5f, -0.311004243f, 0.0f, // bottom left
+            0.5f, -0.311004243f, 0.0f   // bottom right
         )
     }
-
 }

@@ -1,4 +1,4 @@
-package com.example.cameracheckup
+package com.example.glcamerainfo
 
 import org.junit.Test
 

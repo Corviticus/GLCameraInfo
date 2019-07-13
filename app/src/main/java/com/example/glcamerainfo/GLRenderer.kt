@@ -1,4 +1,4 @@
-package com.example.cameracheckup
+package com.example.glcamerainfo
 
 import android.content.Context
 import android.opengl.GLES30

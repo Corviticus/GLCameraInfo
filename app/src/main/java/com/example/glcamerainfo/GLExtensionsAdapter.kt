@@ -1,4 +1,4 @@
-package com.example.cameracheckup
+package com.example.glcamerainfo
 
 import android.widget.TextView
 import android.content.Context

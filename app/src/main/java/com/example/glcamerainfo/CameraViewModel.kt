@@ -1,4 +1,4 @@
-package com.example.cameracheckup
+package com.example.glcamerainfo
 
 import android.util.Range
 import androidx.lifecycle.MutableLiveData

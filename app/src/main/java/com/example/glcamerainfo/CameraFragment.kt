@@ -1,4 +1,4 @@
-package com.example.cameracheckup
+package com.example.glcamerainfo
 
 import android.Manifest
 import android.content.pm.PackageManager
@@ -15,9 +15,9 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.Observer
-import com.example.cameracheckup.CameraInfo.Companion.SUPPORT_LEVEL_FULL
-import com.example.cameracheckup.CameraInfo.Companion.SUPPORT_LEVEL_LEGACY
-import com.example.cameracheckup.CameraInfo.Companion.SUPPORT_LEVEL_LIMITED
+import com.example.glcamerainfo.CameraInfo.Companion.SUPPORT_LEVEL_FULL
+import com.example.glcamerainfo.CameraInfo.Companion.SUPPORT_LEVEL_LEGACY
+import com.example.glcamerainfo.CameraInfo.Companion.SUPPORT_LEVEL_LIMITED
 import kotlinx.android.synthetic.*
 import kotlinx.android.synthetic.main.camera_fragment_layout.*
 import kotlinx.coroutines.*

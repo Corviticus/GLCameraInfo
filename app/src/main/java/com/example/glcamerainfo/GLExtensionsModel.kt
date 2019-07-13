@@ -1,4 +1,4 @@
-package com.example.cameracheckup
+package com.example.glcamerainfo
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
