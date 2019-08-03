@@ -10,7 +10,9 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import kotlinx.android.synthetic.*
 import kotlinx.android.synthetic.main.layout_fragment_about.view.*
 
-
+/**
+ * A class for displaying a Fragment containing information about this app
+ */
 class AboutFragment : androidx.fragment.app.DialogFragment() {
 
     companion object {
@@ -21,8 +23,8 @@ class AboutFragment : androidx.fragment.app.DialogFragment() {
          * Factory method to create a new instance of
          * this fragment using the provided parameter
          *
-         * @param title
-         * @return A new instance of fragment LocationPermissionsFragment.
+         * @param title The title to display on the top of fragment
+         * @return A new instance of fragment AboutFragment.
          */
         @JvmStatic
         fun newInstance(title: String): AboutFragment {
@@ -33,6 +35,7 @@ class AboutFragment : androidx.fragment.app.DialogFragment() {
         }
     }
 
+    // two web views to display some html
     private var infoWebView: WebView? = null
     private var changeListWebView: WebView? = null
 

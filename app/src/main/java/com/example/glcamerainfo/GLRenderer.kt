@@ -12,8 +12,8 @@ import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 
 /**
- *
- *
+ * A class to render the data
+ * @param ctx Application [Context]
  */
 class GLRenderer(private val ctx: Context) : GLSurfaceView.Renderer {
 
@@ -76,7 +76,6 @@ class GLRenderer(private val ctx: Context) : GLSurfaceView.Renderer {
 
     /**
      * Checks error status after making an OpenGL call
-     *
      * @param glOperation - Name of the OpenGL call to check
      */
     fun checkGlError(glOperation: String) {

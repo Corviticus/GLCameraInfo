@@ -77,7 +77,7 @@ class CameraInfo(private val activity: Activity, private val cameraViewModel: Ca
 
     /**
      * This [CameraDevice.StateCallback] is called when the [CameraDevice] changes it's state
-     * */
+     */
     private val mStateCallback = object : CameraDevice.StateCallback() {
 
         override fun onOpened(cameraDevice: CameraDevice) {
@@ -195,17 +195,16 @@ class CameraInfo(private val activity: Activity, private val cameraViewModel: Ca
     }
 
     /**
-     *
-     * @return
+     * Returns a list of AutoFocus modes for the device's camera
+     * @return An [Array] of [Integer] values
      */
     private fun getFocusCharacteristics(): IntArray? {
-
         return mCameraCharacteristics?.get(CameraCharacteristics.CONTROL_AF_AVAILABLE_MODES)
     }
 
     /**
-     *
-     * @return
+     * Returns the Focus Capability of the device's camera
+     * @return A [String] containing the Focus Capabilities of the device's camera
      */
     private fun getFocusCapabilities(): String {
 
@@ -233,8 +232,8 @@ class CameraInfo(private val activity: Activity, private val cameraViewModel: Ca
     }
 
     /**
-     *
-     * @return
+     * Returns the Hardware Support Level of the device's camera
+     * @return A [String] containing the device camera hardware support level
      */
     fun getCameraHardwareSupport(): String {
 
@@ -251,8 +250,8 @@ class CameraInfo(private val activity: Activity, private val cameraViewModel: Ca
     }
 
     /**
-     *
-     * @return
+     * Returns the "Capabilities" of the device's camera as is pertinent to this app
+     * @return A [String] containing some pre defined capabilities for a device's camera
      */
     fun getCameraCapabilities(): String {
 
@@ -314,7 +313,7 @@ class CameraInfo(private val activity: Activity, private val cameraViewModel: Ca
             mCameraCharacteristics = mCameraManager?.getCameraCharacteristics("0")
             for (cameraId in (mCameraManager as CameraManager).cameraIdList) {
                 val facing = mCameraCharacteristics?.get(CameraCharacteristics.LENS_FACING)
-                if (facing != CameraMetadata.LENS_FACING_FRONT) {
+                if (facing != LENS_FACING_FRONT) {
                     backCameraId = cameraId
                     break
                 }

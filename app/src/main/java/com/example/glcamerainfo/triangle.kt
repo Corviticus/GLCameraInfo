@@ -57,7 +57,6 @@ class Triangle(private val mRenderer: GLRenderer) {
 
     /**
      * Encapsulates the OpenGL ES instructions for drawing this shape.
-     *
      * @param mvpMatrix - The Model View Project matrix in which to draw
      * this shape.
      */
@@ -100,6 +99,7 @@ class Triangle(private val mRenderer: GLRenderer) {
         GLES30.glDisableVertexAttribArray(mPositionHandle)
     }
 
+    // good place for constants
     companion object {
 
         private const val VERTEX_SHADER = "shaders/vertex_shader.glsl"

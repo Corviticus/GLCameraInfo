@@ -154,7 +154,7 @@ class CameraFragment : Fragment(), CoroutineScope {
     }
 
     /**
-     * An observer for each view model value. Used for updating the UI as the values change
+     * Create an observer for each view model value. Used for automatically updating the UI as the values change.
      */
     private fun bindViewModelObservers() {
         // exposure compensation value change observer
@@ -193,7 +193,7 @@ class CameraFragment : Fragment(), CoroutineScope {
             }
         })
 
-        // focus lock capability observer
+        // EV Compensation capability observer
         mCameraViewModel?.supportsEVComp?.observe(this, Observer {
             launch(coroutineContext) {
                 when (it) {
@@ -213,7 +213,7 @@ class CameraFragment : Fragment(), CoroutineScope {
             }
         })
 
-        // focus lock capability observer
+        // ISO value capability observer
         mCameraViewModel?.supportsISO?.observe(this, Observer {
             launch(coroutineContext) {
                 when (it) {
@@ -233,7 +233,7 @@ class CameraFragment : Fragment(), CoroutineScope {
             }
         })
 
-        // focus lock capability observer
+        // Exposure Value capability observer
         mCameraViewModel?.supportsEV?.observe(this, Observer {
             launch(coroutineContext) {
                 when (it) {

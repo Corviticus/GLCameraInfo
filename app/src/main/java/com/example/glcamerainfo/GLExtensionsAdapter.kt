@@ -7,8 +7,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 
+/**
+ * A class used to populate the GL Extensions list
+ * @param mContext The application [Context]
+ * @param mDataModel A [MutableList] containing the values
+ */
 class GLExtensionsAdapter(
-    private val mContext: Context,
+    mContext: Context,
     private val mDataModel: MutableList<String>) :
     ArrayAdapter<String>(mContext, R.layout.row_item, mDataModel) {
 

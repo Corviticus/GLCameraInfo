@@ -9,6 +9,9 @@ import android.view.WindowManager
 import androidx.constraintlayout.widget.ConstraintLayout
 import kotlinx.android.synthetic.main.fragment_camera_permissions_rationale.view.*
 
+/**
+ * A fragment used to ask the user for camera permissions
+ */
 class CameraPermissionsFragment : androidx.fragment.app.DialogFragment() {
 
     companion object {
@@ -31,9 +34,6 @@ class CameraPermissionsFragment : androidx.fragment.app.DialogFragment() {
         }
     }
 
-    /**
-     * onCreate()
-     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -41,9 +41,6 @@ class CameraPermissionsFragment : androidx.fragment.app.DialogFragment() {
 
     }
 
-    /**
-     * onCreateView()
-     */
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
 

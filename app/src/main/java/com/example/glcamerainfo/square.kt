@@ -1,6 +1,5 @@
 package com.example.glcamerainfo
 
-
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.FloatBuffer
@@ -31,6 +30,7 @@ class Square(private val mRenderer: GLRenderer) {
     private val green = "3F".toLong(16) / 255f
     private val blue = "9F".toLong(16) / 255f
     private var squareColor = floatArrayOf(red, green, blue, 0.0f)
+
     /**
      * Set up the drawing object data for use in an OpenGL ES context
      */
@@ -63,8 +63,7 @@ class Square(private val mRenderer: GLRenderer) {
     }
 
     /**
-     * Encapsulates the OpenGL ES instructions for drawing this shape.
-     *
+     * Encapsulates the OpenGL ES instructions for drawing this shape
      * @param mvpMatrix - The Model View Project matrix in which to draw
      * this shape.
      */
@@ -125,5 +124,4 @@ class Square(private val mRenderer: GLRenderer) {
             0.5f, 0.5f, 0.0f    // top right
         )
     }
-
 }

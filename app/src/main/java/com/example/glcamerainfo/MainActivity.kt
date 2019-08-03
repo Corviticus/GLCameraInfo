@@ -62,6 +62,11 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
     }
 
+    /**
+     * Called to inflate a given [Menu] as specified by it's xml definition
+     * @param menu The [Menu] being used
+     * @return A [Boolean] True if menu was created or False otherwise
+     */
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
 
         val inflater = menuInflater
@@ -73,6 +78,11 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         return super.onCreateOptionsMenu(menu)
     }
 
+    /**
+     * Called to enable or disable various menu items
+     * @param menu The [Menu] being used
+     * @return A [Boolean] True if the event was handled or False if not
+     */
     override fun onPrepareOptionsMenu(menu: Menu): Boolean {
 
         // default is enabled
@@ -82,6 +92,11 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         return true
     }
 
+    /**
+     * Called when an overflow menu item is selected
+     * @param menuItem The [MenuItem] that was selected
+     * @return A [Boolean] True if the event was handled or False if not
+     */
     override fun onOptionsItemSelected(menuItem: MenuItem): Boolean {
 
         when (menuItem.itemId) {
@@ -109,7 +124,6 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     /**
      * Creates a fragment without adding it to the back stack
      * This preserves the desired navigation behavior (back button does not affect bottom navigation)
-     *
      * @param fragment Fragment to be launched
      * @param fragName String containing the fragment's extensionName
      */

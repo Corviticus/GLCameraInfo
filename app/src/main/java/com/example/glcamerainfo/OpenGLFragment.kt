@@ -14,6 +14,9 @@ import android.widget.ListView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 
+/**
+ * A fragment to display the OpenGL extensions values
+ */
 class OpenGLFragment : Fragment() {
 
     private lateinit var glExtensionsViewModel: GLExtensionsModel
@@ -88,15 +91,22 @@ class OpenGLFragment : Fragment() {
         mGLSurfaceView?.onPause()
     }
 
+    /**
+     * Write the OpenGL version info
+     */
     private fun bindEGLVersion() {
 
-        //
+        // populate model with the devices EGL version
         glExtensionsViewModel.glVersion.value =
             EGL14.eglQueryString(EGL14.eglGetDisplay(EGL14.EGL_DEFAULT_DISPLAY), EGL14.EGL_VERSION)
         EGL14.eglQueryString(EGL14.eglGetDisplay(EGL14.EGL_DEFAULT_DISPLAY), GLES30.GL_VERSION)
         gl_version_text_view.text = glExtensionsViewModel.glVersion.value ?: ""
     }
 
+    /**
+     * Write the GL extensions info
+     * All spaces are replaced with line returns for easy display
+     */
     private fun bindEGLExtensions() {
 
         // get the supported gl extensions and replace spaces with line breaks
