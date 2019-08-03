@@ -19,7 +19,8 @@ the user for the given device's camera hardware.
 ## Code Snippets
 
 Vertex Shader:
-```
+
+```GLSL
 #version 300 es
 
 uniform mat4 uMVPMatrix;
@@ -32,7 +33,8 @@ void main() {
 ```
 
 Fragment Shader:
-```
+
+```GLSL
 #version 300 es
 
 precision mediump float;
@@ -47,7 +49,7 @@ void main() {
 
 Compile Shaders:
 
-```
+```Kotlin
  /**
      * Creates a new program from the supplied vertex and fragment shaders
      * @param vertexFile Asset file containing the vertex shader code
