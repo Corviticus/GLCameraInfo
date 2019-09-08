@@ -37,7 +37,8 @@
     <string name="full_support_string">FULL devices support all of the major capabilities of the Camera API2 and
         must use the Camera HAL 3.2 or later and Android 5.0 (Lollipop) or later.</string>
 
-    <string name="level_3_support_string">This device supports YUV reprocessing and RAW image capture, along with
+    <string name="three_support_string">This device supports all of the major capabilities of the Camera API2 and
+        must use the Camera HAL 3.2 or later and Android 5.0 (Lollipop) or later PLUS it offers YUV reprocessing and RAW image capture, along with
         additional output stream configurations.</string>
 
     <string name="external_support_string">This device is similar to LIMITED devices with some exceptions;

@@ -15,6 +15,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.Observer
+import com.example.glcamerainfo.CameraInfo.Companion.SUPPORT_LEVEL_3
 import com.example.glcamerainfo.CameraInfo.Companion.SUPPORT_LEVEL_FULL
 import com.example.glcamerainfo.CameraInfo.Companion.SUPPORT_LEVEL_LEGACY
 import com.example.glcamerainfo.CameraInfo.Companion.SUPPORT_LEVEL_LIMITED
@@ -111,15 +112,33 @@ class CameraFragment : Fragment(), CoroutineScope {
         launch(coroutineContext) {
             // get camera hardware support level and display the opening paragraph
             val supportedHardware = mCameraInfo?.getCameraHardwareSupport()
-            val hardwareSupportString = "Your camera offers $supportedHardware Level hardware support. " +
-                    "This support level was determined by the manufacturer of this device and cannot be changed. "
+            val hardwareSupportString = when(supportedHardware) {
+                SUPPORT_LEVEL_3 -> "Your camera offers Level $supportedHardware hardware support. " +
+                        "This support level was determined by the manufacturer of this device and cannot be changed. "
+                else -> "Your camera offers $supportedHardware Level hardware support. " +
+                        "This support level was determined by the manufacturer of this device and cannot be changed. "
+            }
+
             camera_version_text_view.text = hardwareSupportString
 
             // add more info about the support level
             when (supportedHardware) {
-                SUPPORT_LEVEL_LEGACY -> version_info_text_view.text = context?.getString(R.string.legacy_support_string)
-                SUPPORT_LEVEL_LIMITED -> version_info_text_view.text = context?.getString(R.string.limited_support_string)
-                SUPPORT_LEVEL_FULL -> version_info_text_view.text = context?.getString(R.string.full_support_string)
+                SUPPORT_LEVEL_LEGACY -> {
+                    version_info_text_view.text = context?.getString(R.string.legacy_support_string)
+                    mCameraViewModel?.supportsFocusLock?.value = false
+                }
+                SUPPORT_LEVEL_LIMITED -> {
+                    version_info_text_view.text = context?.getString(R.string.limited_support_string)
+                    mCameraViewModel?.supportsFocusLock?.value = false
+                }
+                SUPPORT_LEVEL_FULL -> {
+                    version_info_text_view.text = context?.getString(R.string.full_support_string)
+                    mCameraViewModel?.supportsFocusLock?.value = true
+                }
+                SUPPORT_LEVEL_3 -> {
+                    version_info_text_view.text = context?.getString(R.string.three_support_string)
+                    mCameraViewModel?.supportsFocusLock?.value = true
+                }
             }
         }
     }
@@ -185,7 +204,7 @@ class CameraFragment : Fragment(), CoroutineScope {
         mCameraViewModel?.exposureValues?.observe(this, Observer { evRange ->
             launch(coroutineContext) {
                 evRange?.let {
-                    val rangeString = "${it.lower} to ${it.upper}"
+                    val rangeString = "${String.format("%.3f", it.lower * 1e-6)}mS to ${String.format("%.3f", it.upper * 1e-6)}mS"
                     val valueString = "\u003C $rangeString \u003E"
                     ev_range_textview.text = valueString
                     mCameraViewModel?.supportsEV?.value = true

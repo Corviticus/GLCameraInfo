@@ -125,7 +125,8 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintVertical_bias="0.00"
-            android:stretchColumns="0,1,2">
+            android:stretchColumns="0,2"
+            android:shrinkColumns="1">
 
         <TableRow
                 android:id="@+id/header"
@@ -272,10 +273,11 @@
                     android:layout_marginStart="16dp"/>
 
             <TextView
+                    android:id="@+id/focus_lock_supported_textview"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:textAppearance="@style/SmallText"
-                    android:gravity="center" android:id="@+id/focus_lock_supported_textview"/>
+                    android:gravity="center" />
 
             <TextView
                     android:id="@+id/focus_lock_textview"
